@@ -18,5 +18,8 @@ TODO:
       * ...
    * Look at  logs for different components
    * Deploy grafana and configure metrics (?)
-   * Run mqtt client simulator
+   * MQTT client simulator
+      * Run publishers simulating IoT devices
+      * Run subscribers as consumer application showing data
+   * Real time streaming analytics using Spark Streaming
    * ...
