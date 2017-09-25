@@ -21,5 +21,7 @@ TODO:
    * MQTT client simulator
       * Run publishers simulating IoT devices
       * Run subscribers as consumer application showing data
-   * Real time streaming analytics using Spark Streaming
+   * Real time streaming analytics using Spark Streaming ([EnMasse IoT demo](https://github.com/ppatierno/enmasse-iot-demo/blob/master/spark.md))
+      * Deploy Spark cluster
+      * Deploy Spark driver
    * ...
