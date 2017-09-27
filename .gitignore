@@ -1,3 +1,6 @@
+# Maven stuff
+**/target/*
+
 # Gradle stuff
 .gradle
 /build/
@@ -12,3 +15,6 @@
 # IntelliJ IDEA specific
 .idea/
 *.iml
+
+# Vert.x
+.vertx
