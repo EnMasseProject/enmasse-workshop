@@ -16,24 +16,51 @@
 
 package io.enmasse.iot.transport;
 
+import io.netty.handler.codec.mqtt.MqttQoS;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.mqtt.MqttClientOptions;
 
 /**
  * Client implementation for MQTT protocol
  */
 public class MqttClient extends Client {
 
-    public MqttClient(String hostname, int port) {
-        super(hostname, port);
+    private io.vertx.mqtt.MqttClient client;
+
+    public MqttClient(String hostname, int port, Vertx vertx) {
+        super(hostname, port, vertx);
+
     }
 
     @Override
     public void connect() {
-
+        this.connect(null, null);
     }
 
     @Override
-    public void send(String message, Handler<Void> sendCompletionHandler) {
+    public void connect(String username, String password) {
 
+        MqttClientOptions options =
+                new MqttClientOptions()
+                .setUsername(username)
+                .setPassword(password);
+
+        this.client = io.vertx.mqtt.MqttClient.create(vertx, options);
+        this.client.connect(this.port, this.hostname, done -> {
+
+            if (done.succeeded()) {
+                // TODO
+            } else {
+                // TODO
+            }
+        });
+    }
+
+    @Override
+    public void send(String address, String message, Handler<Void> sendCompletionHandler) {
+
+        this.client.publish(address, Buffer.buffer(message), MqttQoS.AT_MOST_ONCE, false, false);
     }
 }

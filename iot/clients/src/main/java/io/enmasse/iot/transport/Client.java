@@ -17,6 +17,7 @@
 package io.enmasse.iot.transport;
 
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 
 /**
  * Base class for different transport protocol clients (AMQP, MQTT, ...)
@@ -25,6 +26,7 @@ public abstract class Client {
 
     protected final String hostname;
     protected final int port;
+    protected final Vertx vertx;
     protected Handler<String> receivedHandler;
     protected Handler<Void> sendCompletionHandler;
 
@@ -33,10 +35,12 @@ public abstract class Client {
      *
      * @param hostname  hostname to connect to
      * @param port  host port to connect to
+     * @param vertx Vert.x instance used for the client
      */
-    public Client(String hostname, int port) {
+    public Client(String hostname, int port, Vertx vertx) {
         this.hostname = hostname;
         this.port = port;
+        this.vertx = vertx;
     }
 
     /**
@@ -45,12 +49,21 @@ public abstract class Client {
     public abstract void connect();
 
     /**
+     * Connect to the remote system with username/password credentials
+     *
+     * @param username  username
+     * @param password  password
+     */
+    public abstract void connect(String username, String password);
+
+    /**
      * Send a message to the remote system
      *
+     * @param address   address to send the message
      * @param message   message to send
      * @param sendCompletionHandler handler to call on sent completion
      */
-    public abstract void send(String message, Handler<Void> sendCompletionHandler);
+    public abstract void send(String address, String message, Handler<Void> sendCompletionHandler);
 
     /**
      * Set the handler for incoming messages
