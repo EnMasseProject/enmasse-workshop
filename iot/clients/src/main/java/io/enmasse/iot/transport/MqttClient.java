@@ -59,6 +59,12 @@ public class MqttClient extends Client {
     }
 
     @Override
+    public void disconnet() {
+
+        this.client.disconnect();
+    }
+
+    @Override
     public void send(String address, String message, Handler<Void> sendCompletionHandler) {
 
         this.client.publish(address, Buffer.buffer(message), MqttQoS.AT_MOST_ONCE, false, false);

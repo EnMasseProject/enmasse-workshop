@@ -57,6 +57,11 @@ public abstract class Client {
     public abstract void connect(String username, String password);
 
     /**
+     * Disconnect from the remote system
+     */
+    public abstract void disconnet();
+
+    /**
      * Send a message to the remote system
      *
      * @param address   address to send the message

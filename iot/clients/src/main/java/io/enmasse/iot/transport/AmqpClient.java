@@ -33,7 +33,7 @@ import java.util.Map;
 public class AmqpClient extends Client {
 
     private ProtonClient client;
-    private ProtonConnection conn;
+    private ProtonConnection connection;
     private Map<String, ProtonSender> senders;
 
     public AmqpClient(String hostname, int port, Vertx vertx) {
@@ -54,10 +54,14 @@ public class AmqpClient extends Client {
 
             if (done.succeeded()) {
 
-                ProtonConnection conn = done.result();
-                conn.open();
+                this.connection = done.result();
+                this.connection.open();
 
-                this.senders = new HashMap<>();
+                if (this.senders != null) {
+                    this.senders.clear();
+                } else {
+                    this.senders = new HashMap<>();
+                }
 
             } else {
                 // TODO
@@ -66,14 +70,24 @@ public class AmqpClient extends Client {
     }
 
     @Override
+    public void disconnet() {
+
+        for (ProtonSender sender: this.senders.values()) {
+            sender.close();
+        }
+        this.senders.clear();
+        this.connection.close();
+    }
+
+    @Override
     public void send(String address, String message, Handler<Void> sendCompletionHandler) {
 
         ProtonSender sender = this.senders.get(address);
         if (sender == null) {
 
-            sender = conn.createSender(address);
+            sender = this.connection.createSender(address);
             sender.open();
-            this.senders.put(address, sender);  
+            this.senders.put(address, sender);
         }
 
         Message msg = ProtonHelper.message(message);
