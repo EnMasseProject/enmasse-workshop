@@ -61,12 +61,16 @@ public class MqttClient extends Client {
     @Override
     public void disconnet() {
 
-        this.client.disconnect();
+        this.vertx.runOnContext(c -> {
+            this.client.disconnect();
+        });
     }
 
     @Override
     public void send(String address, String message, Handler<Void> sendCompletionHandler) {
 
-        this.client.publish(address, Buffer.buffer(message), MqttQoS.AT_MOST_ONCE, false, false);
+        this.vertx.runOnContext(c -> {
+            this.client.publish(address, Buffer.buffer(message), MqttQoS.AT_MOST_ONCE, false, false);
+        });
     }
 }

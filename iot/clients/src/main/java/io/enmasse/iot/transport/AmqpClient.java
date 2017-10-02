@@ -71,7 +71,8 @@ public class AmqpClient extends Client {
 
     @Override
     public void disconnet() {
-        vertx.runOnContext(c -> {
+
+        this.vertx.runOnContext(c -> {
             for (ProtonSender sender: this.senders.values()) {
                 sender.close();
             }
@@ -83,7 +84,7 @@ public class AmqpClient extends Client {
     @Override
     public void send(String address, String message, Handler<Void> sendCompletionHandler) {
 
-        vertx.runOnContext(c -> {
+        this.vertx.runOnContext(c -> {
             ProtonSender sender = this.senders.get(address);
             if (sender == null) {
 
