@@ -71,33 +71,36 @@ public class AmqpClient extends Client {
 
     @Override
     public void disconnet() {
-
-        for (ProtonSender sender: this.senders.values()) {
-            sender.close();
-        }
-        this.senders.clear();
-        this.connection.close();
+        vertx.runOnContext(c -> {
+            for (ProtonSender sender: this.senders.values()) {
+                sender.close();
+            }
+            this.senders.clear();
+            this.connection.close();
+        });
     }
 
     @Override
     public void send(String address, String message, Handler<Void> sendCompletionHandler) {
 
-        ProtonSender sender = this.senders.get(address);
-        if (sender == null) {
+        vertx.runOnContext(c -> {
+            ProtonSender sender = this.senders.get(address);
+            if (sender == null) {
 
-            sender = this.connection.createSender(address);
-            sender.open();
-            this.senders.put(address, sender);
-        }
+                sender = this.connection.createSender(address);
+                sender.open();
+                this.senders.put(address, sender);
+            }
 
-        Message msg = ProtonHelper.message(message);
-        msg.setAddress(address);
+            Message msg = ProtonHelper.message(message);
+            msg.setAddress(address);
 
-        if (sender.isOpen()) {
+            if (sender.isOpen()) {
 
-            sender.send(msg, delivery -> {
-                // TODO
-            });
-        }
+                sender.send(msg, delivery -> {
+                    // TODO
+                });
+            }
+        });
     }
 }
