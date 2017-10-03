@@ -49,13 +49,26 @@ Run the deployment script with `-h` option
 ./enmasse-0.13.0/enmasse-deploy.sh -h
 ```
 
+In this workshop, we will deploy using the standard (keycloak) authentication service, use the `enmasse` namespace, and tell it to deploy to our minishift cluster.
 
+```
+./enmasse-0.13.0/enmasse-deploy.sh -a standard -n enmasse -m https://$(minishift ip):8443
+```
+
+#### Startup
+
+You can observe the state of the EnMasse cluster using `oc get pods -n enmasse`. When all the pods are in the `Running` state, the cluster is ready. While waiting, go to the OpenShift console.
+
+In the OpenShift console, you can see the different deployments for the various EnMasse components. You can go into each pod and look at the logs. If we go to the address controller log, you can see that its creating a 'default' address space.
+
+In EnMasse, you have the concepts of address spaces and addresses.
+
+* Each address space can be accessed through a single (per protocol) connection and are isolated
+  from each other.
 
 TODO:
-   * Explore enmasse deploy options
-   * Deploy EnMasse into its own namespace (multitenant mode?)
    * Go to EnMasse console, create addresses:
-      * ...
+      * explain queues, topics, anycast, multicast
    * Look at  logs for different components
    * Deploy grafana and configure metrics (?)
    * MQTT client simulator
