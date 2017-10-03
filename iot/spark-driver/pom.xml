@@ -23,6 +23,11 @@
       <artifactId>spark-streaming-amqp_2.11</artifactId>
       <version>0.2.0</version>
     </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-proton</artifactId>
+      <version>${vertx.version}</version>
+    </dependency>
   </dependencies>
 
 </project>
