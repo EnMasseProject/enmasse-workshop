@@ -41,7 +41,8 @@ import scala.Some;
 
 /**
  * Sample Spark driver for getting temperature values from sensor
- * analyzing them in real team as a stream
+ * analyzing them in real team as a stream providing max value in
+ * the latest 5 secs
  */
 public class TemperatureAnalyzer {
 
@@ -126,6 +127,8 @@ public class TemperatureAnalyzer {
 
         Broadcast<String> messagingHost = ssc.sparkContext().broadcast(host);
         Broadcast<Integer> messagingPort = ssc.sparkContext().broadcast(port);
+        Broadcast<String> messagingUsername = ssc.sparkContext().broadcast(username);
+        Broadcast<String> messagingPassword = ssc.sparkContext().broadcast(password);
 
         max.foreachRDD(rdd -> {
 
@@ -135,7 +138,8 @@ public class TemperatureAnalyzer {
                 ProtonClient client = ProtonClient.create(vertx);
 
                 log.info("Connecting to messaging ...");
-                client.connect(messagingHost.value(), messagingPort.getValue(), done -> {
+                client.connect(messagingHost.value(), messagingPort.value(),
+                        messagingUsername.value(), messagingPassword.value(), done -> {
 
                     if (done.succeeded()) {
 
