@@ -61,10 +61,35 @@ You can observe the state of the EnMasse cluster using `oc get pods -n enmasse`.
 
 In the OpenShift console, you can see the different deployments for the various EnMasse components. You can go into each pod and look at the logs. If we go to the address controller log, you can see that its creating a 'default' address space.
 
+#### Authenticating
+
+Our cluster does not yet have any users created, so it cannot create addresses. We therefore have to create a user using the keycloak interface. Go to the OpenShift console, application -> routes, and click on the hostname for the 'keycloak' route. This should bring you to the keycloak admin console. The admin user is protected by an automatically generated password, so we need to extract that as well before being able to create users.
+
+```
+oc extract secret/keycloak-credentials
+cat admin.password
+```
+
+#### Address model
+
 In EnMasse, you have the concepts of address spaces and addresses.
 
-* Each address space can be accessed through a single (per protocol) connection and are isolated
-  from each other.
+An address space is a group of addresses that can be accessed through a single connection (per
+protocol). This means that clients connected to the endpoints of an address space can send messages
+to or receive messages from any address it is authorized to send messages to or receive messages
+from within that address space. An address space can support multiple protocols, which is defined by
+the address space type.
+
+An address is part of an address space and represents a destination used for sending and receiving
+messages. An address has a type, which defines the semantics of sending messages to and receiving
+messages from that address.
+
+
+#### Creating addresses
+
+Go to the console, and locate the 'console' route. Click on the link to get to the EnMasse console.
+
+* Create an address for your IoT
 
 TODO:
    * Go to EnMasse console, create addresses:
