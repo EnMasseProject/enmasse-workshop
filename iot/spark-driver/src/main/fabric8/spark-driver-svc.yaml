@@ -1,0 +1,16 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: ${project.artifactId}
+  name: ${project.artifactId}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: ${project.artifactId}
+    spec:
+      containers:
+      - image: ppatierno/${project.artifactId}:${project.version}
+        name: ${project.artifactId}
