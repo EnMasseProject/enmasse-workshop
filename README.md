@@ -89,7 +89,17 @@ messages from that address.
 
 Go to the console, and locate the 'console' route. Click on the link to get to the EnMasse console.
 
-* Create an address for your IoT
+Create an addresses for your IoT sensors to report metrics on:
+
+   * temperature - type multicast - used by devices to report temperature
+   * status - type multicast      - used by devices to report their status
+   * notifications - type queue   - used by spark to report anomalies
+
+Then a few addresses for controlling devices
+
+   * control/device1 - type queue - used to send control messages to device1
+   * control/device2 - type queue - used to send control messages to device2
+   * control/device3 - type queue - used to send control messages to device3
 
 TODO:
    * Go to EnMasse console, create addresses:
