@@ -12,5 +12,5 @@ spec:
         name: ${project.artifactId}
     spec:
       containers:
-      - image: ppatierno/${project.artifactId}:${project.version}
+      - image: enmasseproject/${project.artifactId}:${project.version}
         name: ${project.artifactId}
