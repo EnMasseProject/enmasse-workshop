@@ -16,8 +16,11 @@
 
 package io.enmasse.iot.transport;
 
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+
+import java.util.Properties;
 
 /**
  * Base class for different transport protocol clients (AMQP, MQTT, ...)
@@ -44,17 +47,27 @@ public abstract class Client {
     }
 
     /**
-     * Connect to the remote system
+     * Client initialization
+     *
+     * @param config    properties bag with client configuration parameters
      */
-    public abstract void connect();
+    public abstract void init(Properties config);
+
+    /**
+     * Connect to the remote system
+     *
+     * @param connectHandler    handler called when connection is established (or not)
+     */
+    public abstract void connect(Handler<AsyncResult<Client>> connectHandler);
 
     /**
      * Connect to the remote system with username/password credentials
      *
      * @param username  username
      * @param password  password
+     * @param connectHandler    handler called when connection is established (or not)
      */
-    public abstract void connect(String username, String password);
+    public abstract void connect(String username, String password, Handler<AsyncResult<Client>> connectHandler);
 
     /**
      * Disconnect from the remote system

@@ -17,10 +17,13 @@
 package io.enmasse.iot.transport;
 
 import io.netty.handler.codec.mqtt.MqttQoS;
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.mqtt.MqttClientOptions;
+
+import java.util.Properties;
 
 /**
  * Client implementation for MQTT protocol
@@ -31,16 +34,20 @@ public class MqttClient extends Client {
 
     public MqttClient(String hostname, int port, Vertx vertx) {
         super(hostname, port, vertx);
+    }
+
+    @Override
+    public void init(Properties config) {
 
     }
 
     @Override
-    public void connect() {
-        this.connect(null, null);
+    public void connect(Handler<AsyncResult<Client>> connectHandler) {
+        this.connect(null, null, connectHandler);
     }
 
     @Override
-    public void connect(String username, String password) {
+    public void connect(String username, String password, Handler<AsyncResult<Client>> connectHandler) {
 
         MqttClientOptions options =
                 new MqttClientOptions()

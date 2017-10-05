@@ -16,6 +16,7 @@
 
 package io.enmasse.iot.transport;
 
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.proton.ProtonClient;
@@ -26,6 +27,7 @@ import org.apache.qpid.proton.message.Message;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * Client implementation for AMQP protocol
@@ -41,12 +43,17 @@ public class AmqpClient extends Client {
     }
 
     @Override
-    public void connect() {
-        this.connect(null, null);
+    public void init(Properties config) {
+
     }
 
     @Override
-    public void connect(String username, String password) {
+    public void connect(Handler<AsyncResult<Client>> connectHandler) {
+        this.connect(null, null, connectHandler);
+    }
+
+    @Override
+    public void connect(String username, String password, Handler<AsyncResult<Client>> connectHandler) {
 
         this.client = ProtonClient.create(vertx);
 
