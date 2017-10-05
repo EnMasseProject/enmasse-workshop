@@ -84,6 +84,13 @@ An address is part of an address space and represents a destination used for sen
 messages. An address has a type, which defines the semantics of sending messages to and receiving
 messages from that address.
 
+In the 'standard' address space, we have 4 types of addresses.
+
+   * multicast - 'direct' one-to-many using dispatch router
+   * anycast   - 'direct' peer-2-peer using dispatch router
+   * queue     - queue on broker
+   * topic     - pub/sub on broker
+
 
 #### Creating addresses
 
@@ -102,10 +109,6 @@ Then a few addresses for controlling devices
    * control/device3 - type queue - used to send control messages to device3
 
 TODO:
-   * Go to EnMasse console, create addresses:
-      * explain queues, topics, anycast, multicast
-   * Look at  logs for different components
-   * Deploy grafana and configure metrics (?)
    * MQTT client simulator
       * Run publishers simulating IoT devices
       * Run subscribers as consumer application showing data
