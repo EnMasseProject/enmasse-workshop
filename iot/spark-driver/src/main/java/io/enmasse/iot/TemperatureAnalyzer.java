@@ -59,6 +59,9 @@ public class TemperatureAnalyzer {
     private static String password = null;
     private static String temperatureAddress = "temperature";
     private static String maxAddress = "max";
+    private static String alarmAddress = "alarm";
+
+    private static int alarmThreshold = 30;
 
     public static void main(String[] args) throws InterruptedException {
 
@@ -148,25 +151,46 @@ public class TemperatureAnalyzer {
                         ProtonConnection connection = done.result();
                         connection.open();
 
-                        ProtonSender sender = connection.createSender(maxAddress);
-                        sender.open();
+                        ProtonSender maxSender = connection.createSender(maxAddress);
+                        maxSender.open();
 
                         Message message = ProtonHelper.message();
                         message.setAddress(maxAddress);
                         message.setBody(new Data(new Binary(record.toString().getBytes())));
 
-                        log.info("Sending {} ...", record);
-                        sender.send(message, delivery -> {
+                        log.info("Sending {} to max address...", record);
+                        maxSender.send(message, maxDelivery -> {
 
                             log.info("... message sent");
-                            sender.close();
-                            connection.close();
-                            vertx.close();
+                            maxSender.close();
+
+                            if (record > alarmThreshold) {
+
+                                ProtonSender alarmSender = connection.createSender(alarmAddress);
+                                alarmSender.open();
+
+                                log.info("Alarm !!! Sending {} to alarm address...", record);
+                                message.setAddress(alarmAddress);
+                                alarmSender.send(message, alarmDelivery -> {
+
+                                    log.info("... message sent");
+                                    alarmSender.close();
+                                    connection.close();
+                                    vertx.close();
+                                });
+
+                            } else {
+
+                                connection.close();
+                                vertx.close();
+                            }
+
                         });
 
                     } else {
 
                         log.error("Error on AMQP connection for sending", done.cause());
+                        vertx.close();
                     }
 
                 });
