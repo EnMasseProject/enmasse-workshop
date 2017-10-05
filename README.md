@@ -84,18 +84,31 @@ An address is part of an address space and represents a destination used for sen
 messages. An address has a type, which defines the semantics of sending messages to and receiving
 messages from that address.
 
+In the 'standard' address space, we have 4 types of addresses.
+
+   * multicast - 'direct' one-to-many using dispatch router
+   * anycast   - 'direct' peer-2-peer using dispatch router
+   * queue     - queue on broker
+   * topic     - pub/sub on broker
+
 
 #### Creating addresses
 
 Go to the console, and locate the 'console' route. Click on the link to get to the EnMasse console.
 
-* Create an address for your IoT
+Create an addresses for your IoT sensors to report metrics on:
+
+   * temperature - type multicast - used by devices to report temperature
+   * status - type multicast      - used by devices to report their status
+   * notifications - type queue   - used by spark to report anomalies
+
+Then a few addresses for controlling devices
+
+   * control/device1 - type queue - used to send control messages to device1
+   * control/device2 - type queue - used to send control messages to device2
+   * control/device3 - type queue - used to send control messages to device3
 
 TODO:
-   * Go to EnMasse console, create addresses:
-      * explain queues, topics, anycast, multicast
-   * Look at  logs for different components
-   * Deploy grafana and configure metrics (?)
    * MQTT client simulator
       * Run publishers simulating IoT devices
       * Run subscribers as consumer application showing data
