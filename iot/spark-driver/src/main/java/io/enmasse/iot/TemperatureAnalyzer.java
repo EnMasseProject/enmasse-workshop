@@ -57,8 +57,8 @@ public class TemperatureAnalyzer {
     private static int port = 5672;
     private static String username = null;
     private static String password = null;
-    private static String sourceAddress = "temperature";
-    private static String destinationAddress = "max";
+    private static String temperatureAddress = "temperature";
+    private static String maxAddress = "max";
 
     public static void main(String[] args) throws InterruptedException {
 
@@ -95,7 +95,7 @@ public class TemperatureAnalyzer {
 
         JavaReceiverInputDStream<Integer> receiveStream =
                 AMQPUtils.createStream(ssc, host, port,
-                        Option.apply(username), Option.apply(password), sourceAddress,
+                        Option.apply(username), Option.apply(password), temperatureAddress,
                         message -> {
 
                             Section section = message.getBody();
@@ -148,11 +148,11 @@ public class TemperatureAnalyzer {
                         ProtonConnection connection = done.result();
                         connection.open();
 
-                        ProtonSender sender = connection.createSender(destinationAddress);
+                        ProtonSender sender = connection.createSender(maxAddress);
                         sender.open();
 
                         Message message = ProtonHelper.message();
-                        message.setAddress(destinationAddress);
+                        message.setAddress(maxAddress);
                         message.setBody(new Data(new Binary(record.toString().getBytes())));
 
                         log.info("Sending {} ...", record);
