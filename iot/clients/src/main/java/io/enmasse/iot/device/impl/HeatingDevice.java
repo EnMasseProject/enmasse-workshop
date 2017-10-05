@@ -37,6 +37,8 @@ public class HeatingDevice implements Device {
     private static final int PORT = 5672;
     private static final String USERNAME = "device";
     private static final String PASSWORD = "password";
+    private static final String TEMPERATURE_ADDRESS = "temperature";
+    private static final int UPDATE_INTERVAL = 1000;
 
     private DHT22 dht22;
     private Valve valve;
@@ -86,7 +88,25 @@ public class HeatingDevice implements Device {
 
     private void connected(AsyncResult<Client> ar) {
 
-        // TODO
+        if (ar.succeeded()) {
+
+            int updateInterval = Integer.valueOf(this.config.getProperty(DeviceConfig.UPDATE_INTERVAL));
+            String temperatureAddress = this.config.getProperty(DeviceConfig.TEMPERATURE_ADDRESS);
+            this.vertx.setPeriodic(updateInterval, t -> {
+
+                int temp = this.dht22.getTemperature();
+
+                Client client = ar.result();
+                client.send(temperatureAddress, String.valueOf(temp), v -> {
+                    // TODO
+                });
+
+            });
+
+        } else {
+            // TODO
+        }
+
     }
 
     public static void main(String[] args) {
@@ -98,6 +118,8 @@ public class HeatingDevice implements Device {
         config.setProperty(DeviceConfig.PORT, String.valueOf(PORT));
         config.setProperty(DeviceConfig.USERNAME, USERNAME);
         config.setProperty(DeviceConfig.PASSWORD, PASSWORD);
+        config.setProperty(DeviceConfig.TEMPERATURE_ADDRESS, TEMPERATURE_ADDRESS);
+        config.setProperty(DeviceConfig.UPDATE_INTERVAL, String.valueOf(UPDATE_INTERVAL));
 
         heatingDevice.init(config);
 

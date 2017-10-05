@@ -21,9 +21,12 @@ package io.enmasse.iot.device;
  */
 public class DeviceConfig {
 
-    public static final String HOSTNAME = "hostname";
-    public static final String PORT = "port";
+    public static final String HOSTNAME = "service.hostname";
+    public static final String PORT = "service.port";
 
-    public static final String USERNAME = "username";
-    public static final String PASSWORD = "password";
+    public static final String USERNAME = "device.username";
+    public static final String PASSWORD = "device.password";
+
+    public static final String TEMPERATURE_ADDRESS = "service.temperature.address";
+    public static final String UPDATE_INTERVAL = "device.update.interval";
 }
