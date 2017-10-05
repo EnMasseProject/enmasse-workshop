@@ -66,7 +66,7 @@ public class MqttClient extends Client {
     }
 
     @Override
-    public void disconnet() {
+    public void disconnect() {
 
         this.vertx.runOnContext(c -> {
             this.client.disconnect();
@@ -78,6 +78,21 @@ public class MqttClient extends Client {
 
         this.vertx.runOnContext(c -> {
             this.client.publish(address, Buffer.buffer(message), MqttQoS.AT_MOST_ONCE, false, false);
+        });
+    }
+
+    @Override
+    public void receive(String address) {
+
+        this.vertx.runOnContext(c -> {
+
+            this.client.publishHandler(m -> {
+
+                MessageDelivery messageDelivery = new MessageDelivery(m.topicName(), m.payload().toString());
+                this.receivedHandler.handle(messageDelivery);
+            });
+
+            this.client.subscribe(address, MqttQoS.AT_MOST_ONCE.value());
         });
     }
 }

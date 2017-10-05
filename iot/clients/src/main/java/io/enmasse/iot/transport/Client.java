@@ -30,7 +30,7 @@ public abstract class Client {
     protected final String hostname;
     protected final int port;
     protected final Vertx vertx;
-    protected Handler<String> receivedHandler;
+    protected Handler<MessageDelivery> receivedHandler;
     protected Handler<Void> sendCompletionHandler;
 
     /**
@@ -72,7 +72,7 @@ public abstract class Client {
     /**
      * Disconnect from the remote system
      */
-    public abstract void disconnet();
+    public abstract void disconnect();
 
     /**
      * Send a message to the remote system
@@ -84,12 +84,19 @@ public abstract class Client {
     public abstract void send(String address, String message, Handler<Void> sendCompletionHandler);
 
     /**
+     * Subscribe to receive messages
+     *
+     * @param address   address on which receiving messages
+     */
+    public abstract void receive(String address);
+
+    /**
      * Set the handler for incoming messages
      *
      * @param handler   handler to call when a message is received
      * @return  current client instance
      */
-    public Client receivedHandler(Handler<String> handler) {
+    public Client receivedHandler(Handler<MessageDelivery> handler) {
         this.receivedHandler = handler;
         return this;
     }

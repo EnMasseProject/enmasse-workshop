@@ -38,6 +38,7 @@ public class HeatingDevice implements Device {
     private static final String USERNAME = "device";
     private static final String PASSWORD = "password";
     private static final String TEMPERATURE_ADDRESS = "temperature";
+    private static final String CONTROL_ADDRESS = "control";
     private static final int UPDATE_INTERVAL = 1000;
 
     private DHT22 dht22;
@@ -97,6 +98,13 @@ public class HeatingDevice implements Device {
                 int temp = this.dht22.getTemperature();
 
                 Client client = ar.result();
+
+                client.receivedHandler(messageDelivery -> {
+                    // TODO
+                });
+
+                client.receive(CONTROL_ADDRESS);
+
                 client.send(temperatureAddress, String.valueOf(temp), v -> {
                     // TODO
                 });

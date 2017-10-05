@@ -21,8 +21,11 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.proton.ProtonClient;
 import io.vertx.proton.ProtonConnection;
+import io.vertx.proton.ProtonDelivery;
 import io.vertx.proton.ProtonHelper;
+import io.vertx.proton.ProtonReceiver;
 import io.vertx.proton.ProtonSender;
+import org.apache.qpid.proton.amqp.messaging.AmqpValue;
 import org.apache.qpid.proton.message.Message;
 
 import java.util.HashMap;
@@ -37,6 +40,7 @@ public class AmqpClient extends Client {
     private ProtonClient client;
     private ProtonConnection connection;
     private Map<String, ProtonSender> senders;
+    private Map<String, ProtonReceiver> receivers;
 
     public AmqpClient(String hostname, int port, Vertx vertx) {
         super(hostname, port, vertx);
@@ -70,6 +74,12 @@ public class AmqpClient extends Client {
                     this.senders = new HashMap<>();
                 }
 
+                if (this.receivers != null) {
+                    this.receivers.clear();
+                } else {
+                    this.receivers = new HashMap<>();
+                }
+
             } else {
                 // TODO
             }
@@ -77,13 +87,17 @@ public class AmqpClient extends Client {
     }
 
     @Override
-    public void disconnet() {
+    public void disconnect() {
 
         this.vertx.runOnContext(c -> {
             for (ProtonSender sender: this.senders.values()) {
                 sender.close();
             }
+            for (ProtonReceiver receiver: this.receivers.values()) {
+                receiver.close();
+            }
             this.senders.clear();
+            this.receivers.clear();
             this.connection.close();
         });
     }
@@ -110,5 +124,29 @@ public class AmqpClient extends Client {
                 });
             }
         });
+    }
+
+    @Override
+    public void receive(String address) {
+
+        this.vertx.runOnContext(c -> {
+            if (!this.receivers.containsKey(address)) {
+
+                final ProtonReceiver receiver = this.connection.createReceiver(address);
+                receiver.handler((delivery, message) -> {
+                   this.receiverHandler(receiver, delivery, message);
+                });
+                receiver.open();
+            }
+        });
+    }
+
+    private void receiverHandler(ProtonReceiver receiver, ProtonDelivery delivery, Message message) {
+
+        MessageDelivery messageDelivery =
+                new MessageDelivery(receiver.getSource().getAddress(),
+                        ((AmqpValue)message.getBody()).getValue().toString());
+
+        this.receivedHandler.handle(messageDelivery);
     }
 }
