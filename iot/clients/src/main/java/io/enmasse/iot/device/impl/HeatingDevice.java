@@ -65,6 +65,7 @@ public class HeatingDevice implements Device {
     public void init(Properties config) {
 
         this.config = config;
+        log.info("Init with config {}", config);
 
         // initializing sensors and actuators
         this.dht22.init(null);
@@ -82,18 +83,23 @@ public class HeatingDevice implements Device {
         String username = this.config.getProperty(DeviceConfig.USERNAME);
         String password = this.config.getProperty(DeviceConfig.PASSWORD);
 
+        log.info("Connecting to the service ...");
         this.client.connect(username, password, this::connected);
 
         try {
             System.in.read();
+            this.client.disconnect();
+            this.vertx.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void connected(AsyncResult<Client> ar) {
+    private void connected(AsyncResult<Client> done) {
 
-        if (ar.succeeded()) {
+        if (done.succeeded()) {
+
+            log.info("Connected to the service");
 
             int updateInterval = Integer.valueOf(this.config.getProperty(DeviceConfig.UPDATE_INTERVAL));
             String temperatureAddress = this.config.getProperty(DeviceConfig.TEMPERATURE_ADDRESS);
@@ -101,22 +107,25 @@ public class HeatingDevice implements Device {
 
                 int temp = this.dht22.getTemperature();
 
-                Client client = ar.result();
+                Client client = done.result();
 
                 client.receivedHandler(messageDelivery -> {
-                    // TODO
+                    log.info("Received message on {} with payload {}",
+                            messageDelivery.address(), messageDelivery.message());
                 });
 
                 client.receive(CONTROL_ADDRESS);
 
+                log.info("Sending temperature value = {} ...", temp);
                 client.send(temperatureAddress, String.valueOf(temp), v -> {
-                    // TODO
+                    log.info("... sent");
                 });
 
             });
 
         } else {
-            // TODO
+
+            log.error("Error connecting to the service", done.cause());
         }
 
     }

@@ -65,6 +65,8 @@ public class AmqpClient extends Client {
 
             if (done.succeeded()) {
 
+                log.info("Connected to {}:{}", this.hostname, this.port);
+
                 this.connection = done.result();
                 this.connection.open();
 
@@ -81,7 +83,8 @@ public class AmqpClient extends Client {
                 }
 
             } else {
-                // TODO
+
+                log.error("Error connecting to the service", done.cause());
             }
         });
     }
@@ -99,6 +102,8 @@ public class AmqpClient extends Client {
             this.senders.clear();
             this.receivers.clear();
             this.connection.close();
+
+            log.info("Disconnected");
         });
     }
 

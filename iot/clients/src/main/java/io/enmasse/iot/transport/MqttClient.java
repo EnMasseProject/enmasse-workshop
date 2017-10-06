@@ -59,6 +59,8 @@ public class MqttClient extends Client {
 
             if (done.succeeded()) {
 
+                log.info("Connected to {}:{}", this.hostname, this.port);
+
                 this.client.publishHandler(m -> {
 
                     MessageDelivery messageDelivery = new MessageDelivery(m.topicName(), m.payload().toString());
@@ -71,7 +73,8 @@ public class MqttClient extends Client {
                 });
 
             } else {
-                // TODO
+
+                log.error("Error connecting to the service", done.cause());
             }
         });
     }
@@ -81,6 +84,7 @@ public class MqttClient extends Client {
 
         this.vertx.runOnContext(c -> {
             this.client.disconnect();
+            log.info("Disconnected");
         });
     }
 
