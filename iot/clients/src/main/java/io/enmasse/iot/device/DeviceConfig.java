@@ -30,4 +30,6 @@ public class DeviceConfig {
     public static final String TEMPERATURE_ADDRESS = "service.temperature.address";
     public static final String CONTROL_ADDRESS = "service.control.address";
     public static final String UPDATE_INTERVAL = "device.update.interval";
+
+    public static final String DEVICE_ID = "device.id";
 }

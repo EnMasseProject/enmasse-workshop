@@ -42,8 +42,9 @@ public class HeatingDevice implements Device {
     private static final String USERNAME = "device";
     private static final String PASSWORD = "password";
     private static final String TEMPERATURE_ADDRESS = "temperature";
-    private static final String CONTROL_ADDRESS = "control";
+    private static final String CONTROL_ADDRESS_FORMAT = "control/%s";
     private static final int UPDATE_INTERVAL = 1000;
+    private static final String DEVICE_ID = "device-id";
 
     private DHT22 dht22;
     private Valve valve;
@@ -114,7 +115,7 @@ public class HeatingDevice implements Device {
                             messageDelivery.address(), messageDelivery.message());
                 });
 
-                client.receive(CONTROL_ADDRESS);
+                client.receive(this.config.getProperty(DeviceConfig.CONTROL_ADDRESS));
 
                 log.info("Sending temperature value = {} ...", temp);
                 client.send(temperatureAddress, String.valueOf(temp), v -> {
@@ -132,7 +133,11 @@ public class HeatingDevice implements Device {
 
     public static void main(String[] args) {
 
+        // TODO : getting configuration from commandline or properties file ?
+
         HeatingDevice heatingDevice = new HeatingDevice();
+
+        String deviceId = DEVICE_ID;
 
         Properties config = new Properties();
         config.setProperty(DeviceConfig.HOSTNAME, HOSTNAME);
@@ -140,7 +145,9 @@ public class HeatingDevice implements Device {
         config.setProperty(DeviceConfig.USERNAME, USERNAME);
         config.setProperty(DeviceConfig.PASSWORD, PASSWORD);
         config.setProperty(DeviceConfig.TEMPERATURE_ADDRESS, TEMPERATURE_ADDRESS);
+        config.setProperty(DeviceConfig.CONTROL_ADDRESS, String.format(CONTROL_ADDRESS_FORMAT, deviceId));
         config.setProperty(DeviceConfig.UPDATE_INTERVAL, String.valueOf(UPDATE_INTERVAL));
+        config.setProperty(DeviceConfig.DEVICE_ID, deviceId);
 
         heatingDevice.init(config);
 
