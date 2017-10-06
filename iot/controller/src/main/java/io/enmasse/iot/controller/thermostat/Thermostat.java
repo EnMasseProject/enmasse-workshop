@@ -19,16 +19,20 @@ public class Thermostat extends AbstractVerticle {
 
     private final String messagingHost;
     private final int messagingPort;
-    private final String alarmAddress;
+    private final String username;
+    private final String password;
+    private final String notificationAddress;
     private final String controlPrefix;
     private final int minTemp;
     private final int maxTemp;
     private ProtonConnection connection;
 
-    public Thermostat(String messagingHost, int messagingPort, String alarmAddress, String controlPrefix, int minTemp, int maxTemp) {
+    public Thermostat(String messagingHost, int messagingPort, String username, String password, String notificationAddress, String controlPrefix, int minTemp, int maxTemp) {
         this.messagingHost = messagingHost;
         this.messagingPort = messagingPort;
-        this.alarmAddress = alarmAddress;
+        this.username = username;
+        this.password = password;
+        this.notificationAddress = notificationAddress;
         this.controlPrefix = controlPrefix;
         this.minTemp = minTemp;
         this.maxTemp = maxTemp;
@@ -37,18 +41,18 @@ public class Thermostat extends AbstractVerticle {
     @Override
     public void start(Future<Void> startPromise) {
         ProtonClient alarmClient = ProtonClient.create(vertx);
-        alarmClient.connect(messagingHost, messagingPort, connection -> {
+        alarmClient.connect(messagingHost, messagingPort, username, password, connection -> {
             if (connection.succeeded()) {
                 log.info("Connected to {}:{}", messagingHost, messagingPort);
                 ProtonConnection connectionHandle = connection.result();
 
-                ProtonReceiver receiver = connectionHandle.createReceiver(alarmAddress);
+                ProtonReceiver receiver = connectionHandle.createReceiver(notificationAddress);
                 receiver.handler(this::handleNotification);
                 receiver.openHandler(link -> {
                     if (link.succeeded()) {
                         startPromise.complete();
                     } else {
-                        log.info("Error attaching to {}", alarmAddress, link.cause());
+                        log.info("Error attaching to {}", notificationAddress, link.cause());
                         startPromise.fail(link.cause());
                     }
                 });
@@ -106,14 +110,17 @@ public class Thermostat extends AbstractVerticle {
         Map<String, String> env = System.getenv();
         String messagingHost = env.getOrDefault("MESSAGING_SERVICE_HOST", "localhost");
         int messagingPort = Integer.parseInt(env.getOrDefault("MESSAGING_SERVICE_PORT", "5672"));
+        String username = env.getOrDefault("MESSAGING_SERVICE_USERNAME", "test");
+        String password = env.getOrDefault("MESSAGING_SERVICE_PASSWORD", "test");
 
-        String alarmAddress = env.getOrDefault("ALARM_ADDRESS", "alarm");
+        // TODO: Change this
+        String notificationAddress = env.getOrDefault("NOTIFICATION_ADDRESS", "alarm");
         String controlPrefix = env.getOrDefault("COMMAND_CONTROL_PREFIX", "control");
 
         int minTemp = Integer.parseInt(env.getOrDefault("MIN_TEMPERATURE", "15"));
         int maxTemp = Integer.parseInt(env.getOrDefault("MAX_TEMPERATURE", "25"));
 
         Vertx vertx = Vertx.vertx();
-        vertx.deployVerticle(new Thermostat(messagingHost, messagingPort, alarmAddress, controlPrefix, minTemp, maxTemp));
+        vertx.deployVerticle(new Thermostat(messagingHost, messagingPort, username, password, notificationAddress, controlPrefix, minTemp, maxTemp));
     }
 }
