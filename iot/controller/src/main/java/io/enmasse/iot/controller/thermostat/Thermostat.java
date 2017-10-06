@@ -3,9 +3,11 @@ package io.enmasse.iot.controller.thermostat;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.proton.*;
-import org.apache.qpid.proton.amqp.messaging.AmqpValue;
+import org.apache.qpid.proton.amqp.Binary;
+import org.apache.qpid.proton.amqp.messaging.Data;
 import org.apache.qpid.proton.message.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,13 +21,17 @@ public class Thermostat extends AbstractVerticle {
     private final int messagingPort;
     private final String alarmAddress;
     private final String controlPrefix;
+    private final int minTemp;
+    private final int maxTemp;
     private ProtonConnection connection;
 
-    public Thermostat(String messagingHost, int messagingPort, String alarmAddress, String controlPrefix) {
+    public Thermostat(String messagingHost, int messagingPort, String alarmAddress, String controlPrefix, int minTemp, int maxTemp) {
         this.messagingHost = messagingHost;
         this.messagingPort = messagingPort;
         this.alarmAddress = alarmAddress;
         this.controlPrefix = controlPrefix;
+        this.minTemp = minTemp;
+        this.maxTemp = maxTemp;
     }
 
     @Override
@@ -57,24 +63,30 @@ public class Thermostat extends AbstractVerticle {
     }
 
     private void handleNotification(ProtonDelivery delivery, Message message) {
-        JsonObject object = (JsonObject)((AmqpValue)message.getBody()).getValue();
+        JsonObject object = new JsonObject(Buffer.buffer(((Data) message.getBody()).getValue().getArray()));
         String deviceId = object.getString("deviceId");
         int temperature = object.getInteger("temperature");
-        int threshold = object.getInteger("threshold");
 
-        int newTemperature = calculateTemperature(temperature, threshold);
-        sendNewTemperature(deviceId, newTemperature);
+        adjustTemperature(deviceId, temperature);
     }
 
-    private void sendNewTemperature(String deviceId, int newTemperature) {
+    private void adjustTemperature(String deviceId, int temperature) {
+        if (temperature < minTemp) {
+            sendCommand(deviceId, "open");
+        } else if (temperature > maxTemp) {
+            sendCommand(deviceId, "close");
+        }
+    }
+
+    private void sendCommand(String deviceId, String command) {
         ProtonSender sender = connection.createSender(controlPrefix + "/" + deviceId);
 
         JsonObject object = new JsonObject();
         object.put("deviceId", deviceId);
-        object.put("operation", "setTemperature");
-        object.put("value", newTemperature);
+        object.put("operation", command);
         Message controlMessage = Message.Factory.create();
-        controlMessage.setBody(new AmqpValue(object.toString()));
+
+        controlMessage.setBody(new Data(new Binary(object.toBuffer().getBytes())));
 
         sender.openHandler(link -> {
             if (link.succeeded()) {
@@ -90,17 +102,6 @@ public class Thermostat extends AbstractVerticle {
         sender.open();
     }
 
-    private int calculateTemperature(int temperature, int threshold) {
-        // TODO: Make this smarter
-        if (temperature > threshold) {
-            return threshold - 2; // Due to inertia, lower the temp
-        } else if (temperature < threshold) {
-            return threshold + 2;
-        } else {
-            return temperature;
-        }
-    }
-
     public static void main(String [] args) {
         Map<String, String> env = System.getenv();
         String messagingHost = env.getOrDefault("MESSAGING_SERVICE_HOST", "localhost");
@@ -109,7 +110,10 @@ public class Thermostat extends AbstractVerticle {
         String alarmAddress = env.getOrDefault("ALARM_ADDRESS", "alarm");
         String controlPrefix = env.getOrDefault("COMMAND_CONTROL_PREFIX", "control");
 
+        int minTemp = Integer.parseInt(env.getOrDefault("MIN_TEMPERATURE", "15"));
+        int maxTemp = Integer.parseInt(env.getOrDefault("MAX_TEMPERATURE", "25"));
+
         Vertx vertx = Vertx.vertx();
-        vertx.deployVerticle(new Thermostat(messagingHost, messagingPort, alarmAddress, controlPrefix));
+        vertx.deployVerticle(new Thermostat(messagingHost, messagingPort, alarmAddress, controlPrefix, minTemp, maxTemp));
     }
 }
