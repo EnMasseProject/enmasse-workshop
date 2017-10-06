@@ -108,7 +108,7 @@ public class Thermostat extends AbstractVerticle {
 
     public static void main(String [] args) {
         Map<String, String> env = System.getenv();
-        String messagingHost = env.getOrDefault("MESSAGING_SERVICE_HOST", "localhost");
+        String messagingHost = env.getOrDefault("MESSAGING_SERVICE_HOST", "messaging.enmasse.svc");
         int messagingPort = Integer.parseInt(env.getOrDefault("MESSAGING_SERVICE_PORT", "5672"));
         String username = env.getOrDefault("MESSAGING_SERVICE_USERNAME", "test");
         String password = env.getOrDefault("MESSAGING_SERVICE_PASSWORD", "test");
