@@ -12,6 +12,7 @@
   <modules>
     <module>bom</module>
     <module>clients</module>
+    <module>spark-driver</module>
     <module>controller</module>
   </modules>
 
