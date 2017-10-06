@@ -58,7 +58,18 @@ public class MqttClient extends Client {
         this.client.connect(this.port, this.hostname, done -> {
 
             if (done.succeeded()) {
-                // TODO
+
+                this.client.publishHandler(m -> {
+
+                    MessageDelivery messageDelivery = new MessageDelivery(m.topicName(), m.payload().toString());
+                    this.receivedHandler.handle(messageDelivery);
+                });
+
+                this.client.publishCompletionHandler(messageId -> {
+
+                    this.sendCompletionHandler.handle(null);
+                });
+
             } else {
                 // TODO
             }
@@ -85,13 +96,6 @@ public class MqttClient extends Client {
     public void receive(String address) {
 
         this.vertx.runOnContext(c -> {
-
-            this.client.publishHandler(m -> {
-
-                MessageDelivery messageDelivery = new MessageDelivery(m.topicName(), m.payload().toString());
-                this.receivedHandler.handle(messageDelivery);
-            });
-
             this.client.subscribe(address, MqttQoS.AT_MOST_ONCE.value());
         });
     }

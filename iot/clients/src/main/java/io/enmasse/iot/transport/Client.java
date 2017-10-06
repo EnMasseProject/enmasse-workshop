@@ -19,6 +19,8 @@ package io.enmasse.iot.transport;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
@@ -26,6 +28,8 @@ import java.util.Properties;
  * Base class for different transport protocol clients (AMQP, MQTT, ...)
  */
 public abstract class Client {
+
+    protected final Logger log = LoggerFactory.getLogger(this.getClass());
 
     protected final String hostname;
     protected final int port;

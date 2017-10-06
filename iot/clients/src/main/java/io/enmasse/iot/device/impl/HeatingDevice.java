@@ -24,6 +24,8 @@ import io.enmasse.iot.transport.AmqpClient;
 import io.enmasse.iot.transport.Client;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -32,6 +34,8 @@ import java.util.Properties;
  * An heating device implementation
  */
 public class HeatingDevice implements Device {
+
+    protected final Logger log = LoggerFactory.getLogger(HeatingDevice.class);
 
     private static final String HOSTNAME = "localhost";
     private static final int PORT = 5672;

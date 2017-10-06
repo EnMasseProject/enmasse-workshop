@@ -120,7 +120,8 @@ public class AmqpClient extends Client {
             if (sender.isOpen()) {
 
                 sender.send(msg, delivery -> {
-                    // TODO
+
+                    this.sendCompletionHandler.handle(null);
                 });
             }
         });
