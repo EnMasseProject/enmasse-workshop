@@ -30,4 +30,13 @@
     </dependency>
   </dependencies>
 
+  <build>
+     <plugins>
+        <plugin>
+           <groupId>io.fabric8</groupId>
+           <artifactId>fabric8-maven-plugin</artifactId>
+           <version>3.5.31</version>
+        </plugin>
+     </plugins>
+  </build>
 </project>
