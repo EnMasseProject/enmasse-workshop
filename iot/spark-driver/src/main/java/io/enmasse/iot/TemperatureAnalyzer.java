@@ -17,6 +17,7 @@
 package io.enmasse.iot;
 
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import io.vertx.proton.ProtonClient;
 import io.vertx.proton.ProtonConnection;
 import io.vertx.proton.ProtonHelper;
@@ -27,17 +28,20 @@ import org.apache.qpid.proton.amqp.messaging.Data;
 import org.apache.qpid.proton.amqp.messaging.Section;
 import org.apache.qpid.proton.message.Message;
 import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.storage.StorageLevel;
 import org.apache.spark.streaming.Duration;
 import org.apache.spark.streaming.amqp.AMQPUtils;
 import org.apache.spark.streaming.api.java.JavaDStream;
+import org.apache.spark.streaming.api.java.JavaPairDStream;
 import org.apache.spark.streaming.api.java.JavaReceiverInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.Option;
 import scala.Some;
+import scala.Tuple2;
 
 /**
  * Sample Spark driver for getting temperature values from sensor
@@ -96,27 +100,49 @@ public class TemperatureAnalyzer {
         JavaStreamingContext ssc = new JavaStreamingContext(conf, BATCH_DURATION);
         ssc.checkpoint(CHECKPOINT_DIR);
 
-        JavaReceiverInputDStream<Integer> receiveStream =
+        JavaReceiverInputDStream<DeviceTemperature> receiveStream =
                 AMQPUtils.createStream(ssc, host, port,
                         Option.apply(username), Option.apply(password), temperatureAddress,
                         message -> {
 
                             Section section = message.getBody();
                             if (section instanceof AmqpValue) {
-                                int temp = Integer.valueOf(((AmqpValue) section).getValue().toString());
-                                return new Some<>(temp);
+                                Object value = ((AmqpValue) section).getValue();
+                                JsonObject json = new JsonObject(value.toString());
+                                DeviceTemperature deviceTemperature =
+                                        new DeviceTemperature(json.getString("device-id"),
+                                                json.getInteger("temperature"));
+                                return new Some<>(deviceTemperature);
                             } else if (section instanceof Data) {
                                 Binary data = ((Data)section).getValue();
-                                int temp = Integer.valueOf(new String(data.getArray()));
-                                return new Some<>(temp);
+                                JsonObject json = new JsonObject(new String(data.getArray()));
+                                DeviceTemperature deviceTemperature =
+                                        new DeviceTemperature(json.getString("device-id"),
+                                                json.getInteger("temperature"));
+                                return new Some<>(deviceTemperature);
                             } else {
                                 return null;
                             }
 
                         }, StorageLevel.MEMORY_ONLY());
 
-        //max.print();
+        JavaPairDStream<String, Integer> temperaturesByDevice = receiveStream.mapToPair(deviceTemperature -> {
+            return new Tuple2<>(deviceTemperature.deviceId(), deviceTemperature.temperature());
+        });
 
+        JavaPairDStream<String, Integer> max = temperaturesByDevice.reduceByKeyAndWindow(
+                (a,b) -> {
+
+                    if (a > b)
+                        return a;
+                    else
+                        return b;
+
+                }, new Duration(5000), new Duration(5000));
+
+        max.print();
+
+        /*
         // get maximum temperature in a window
         JavaDStream<Integer> max = receiveStream.reduceByWindow(
                 (a,b) -> {
@@ -127,7 +153,9 @@ public class TemperatureAnalyzer {
                         return b;
 
                 }, new Duration(5000), new Duration(5000));
+        */
 
+        /*
         Broadcast<String> messagingHost = ssc.sparkContext().broadcast(host);
         Broadcast<Integer> messagingPort = ssc.sparkContext().broadcast(port);
         Broadcast<String> driverUsername = ssc.sparkContext().broadcast(username);
@@ -197,6 +225,7 @@ public class TemperatureAnalyzer {
 
             });
         });
+        */
 
         return ssc;
     }
