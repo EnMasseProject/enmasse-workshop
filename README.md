@@ -9,7 +9,7 @@ to a Spark cluster for analyzing the sensor data.
 
 #### Downloading and installing minishift
 
-In this workshop, we'll be using [minishift](https://github.com/minishift/minishift/) to run OpenShift locally on our laptops. Minishift supports all major OS platforms.  Go to https://github.com/minishift/minishift/releases/tag/v1.6.0 and select the download for your OS. 
+In this workshop, we'll be using [minishift](https://github.com/minishift/minishift/) to run OpenShift locally on our laptops. Minishift supports all major OS platforms.  Go to https://github.com/minishift/minishift/releases/tag/v1.6.0 and select the download for your OS.
 
 #### Starting minishift
 
@@ -26,7 +26,7 @@ Once this command completes, the OpenShift cluster should be ready to use.
 
 Take a few minutes to explore the openshift console. Run `minishift dashboard`, which will launch
 the OpenShift dashboard in your browser. You can login with username <b>developer</b> and password
-<b>developer</b>. 
+<b>developer</b>.
 
 ### Installing EnMasse
 
@@ -107,6 +107,25 @@ Then a few addresses for controlling devices
    * control/device1 - type queue - used to send control messages to device1
    * control/device2 - type queue - used to send control messages to device2
    * control/device3 - type queue - used to send control messages to device3
+
+### Installing Spark
+
+An official support for Apache Spark on OpenShift is provided by the [radanalytics.io](https://radanalytics.io/) project which provides
+the Oshinko application with a web UI for deploying a Spark cluster.
+
+First, you have to get the Oshinko resources into your project.
+
+```
+oc create -f https://radanalytics.io/resources.yaml -n enmasse
+```
+
+Then start the Oshinko Web UI application.
+
+```
+oc new-app oshinko-webui
+```
+
+Using this UI, you are able to deploy an Apache Spark cluster inside OpenShift specifying the number of worker nodes you want (other than the default master).
 
 TODO:
    * MQTT client simulator
