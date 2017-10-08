@@ -108,17 +108,11 @@ public class TemperatureAnalyzer {
                             Section section = message.getBody();
                             if (section instanceof AmqpValue) {
                                 Object value = ((AmqpValue) section).getValue();
-                                JsonObject json = new JsonObject(value.toString());
-                                DeviceTemperature deviceTemperature =
-                                        new DeviceTemperature(json.getString("device-id"),
-                                                json.getInteger("temperature"));
+                                DeviceTemperature deviceTemperature = DeviceTemperature.fromJson(value.toString());
                                 return new Some<>(deviceTemperature);
                             } else if (section instanceof Data) {
                                 Binary data = ((Data)section).getValue();
-                                JsonObject json = new JsonObject(new String(data.getArray()));
-                                DeviceTemperature deviceTemperature =
-                                        new DeviceTemperature(json.getString("device-id"),
-                                                json.getInteger("temperature"));
+                                DeviceTemperature deviceTemperature = DeviceTemperature.fromJson(new String(data.getArray()));
                                 return new Some<>(deviceTemperature);
                             } else {
                                 return null;
@@ -126,10 +120,12 @@ public class TemperatureAnalyzer {
 
                         }, StorageLevel.MEMORY_ONLY());
 
+        // from a stream with DeviceTemperature instace to a pair stream with key = device-id, value = temperature
         JavaPairDStream<String, Integer> temperaturesByDevice = receiveStream.mapToPair(deviceTemperature -> {
             return new Tuple2<>(deviceTemperature.deviceId(), deviceTemperature.temperature());
         });
 
+        // reducing the pair stream by key (device-id) for getting max temperature value
         JavaPairDStream<String, Integer> max = temperaturesByDevice.reduceByKeyAndWindow(
                 (a,b) -> {
 
@@ -140,22 +136,8 @@ public class TemperatureAnalyzer {
 
                 }, new Duration(5000), new Duration(5000));
 
-        max.print();
+        //max.print();
 
-        /*
-        // get maximum temperature in a window
-        JavaDStream<Integer> max = receiveStream.reduceByWindow(
-                (a,b) -> {
-
-                    if (a > b)
-                        return a;
-                    else
-                        return b;
-
-                }, new Duration(5000), new Duration(5000));
-        */
-
-        /*
         Broadcast<String> messagingHost = ssc.sparkContext().broadcast(host);
         Broadcast<Integer> messagingPort = ssc.sparkContext().broadcast(port);
         Broadcast<String> driverUsername = ssc.sparkContext().broadcast(username);
@@ -165,6 +147,9 @@ public class TemperatureAnalyzer {
 
             rdd.foreach(record -> {
 
+                // building a DeviceTemperature instance from the pair key = device-id, value = temperature
+                DeviceTemperature deviceTemperature = new DeviceTemperature(record._1(), record._2());
+
                 Vertx vertx = Vertx.vertx();
                 ProtonClient client = ProtonClient.create(vertx);
 
@@ -172,60 +157,58 @@ public class TemperatureAnalyzer {
                 client.connect(messagingHost.value(), messagingPort.value(),
                         driverUsername.value(), driverPassword.value(), done -> {
 
-                    if (done.succeeded()) {
+                            if (done.succeeded()) {
 
-                        log.info("... connected to {}:{}", messagingHost.value(), messagingPort.getValue());
+                                log.info("... connected to {}:{}", messagingHost.value(), messagingPort.getValue());
 
-                        ProtonConnection connection = done.result();
-                        connection.open();
+                                ProtonConnection connection = done.result();
+                                connection.open();
 
-                        ProtonSender maxSender = connection.createSender(maxAddress);
-                        maxSender.open();
+                                ProtonSender maxSender = connection.createSender(maxAddress);
+                                maxSender.open();
 
-                        Message message = ProtonHelper.message();
-                        message.setAddress(maxAddress);
-                        message.setBody(new Data(new Binary(record.toString().getBytes())));
+                                Message message = ProtonHelper.message();
+                                message.setAddress(maxAddress);
+                                message.setBody(new Data(new Binary(deviceTemperature.toJson().toString().getBytes())));
 
-                        log.info("Sending {} to max address...", record);
-                        maxSender.send(message, maxDelivery -> {
-
-                            log.info("... message sent");
-                            maxSender.close();
-
-                            if (record > alarmThreshold) {
-
-                                ProtonSender alarmSender = connection.createSender(alarmAddress);
-                                alarmSender.open();
-
-                                log.info("Alarm !!! Sending {} to alarm address...", record);
-                                message.setAddress(alarmAddress);
-                                alarmSender.send(message, alarmDelivery -> {
+                                log.info("Sending {} to max address ...", deviceTemperature);
+                                maxSender.send(message, maxDelivery -> {
 
                                     log.info("... message sent");
-                                    alarmSender.close();
-                                    connection.close();
-                                    vertx.close();
+                                    maxSender.close();
+
+                                    if (deviceTemperature.temperature() > alarmThreshold) {
+
+                                        ProtonSender alarmSender = connection.createSender(alarmAddress);
+                                        alarmSender.open();
+
+                                        log.info("Alarm !!! Sending {} to alarm address ...", deviceTemperature);
+                                        message.setAddress(alarmAddress);
+                                        alarmSender.send(message, alarmDelivery -> {
+
+                                            log.info("... message sent");
+                                            alarmSender.close();
+                                            connection.close();
+                                            vertx.close();
+                                        });
+
+                                    } else {
+
+                                        connection.close();
+                                        vertx.close();
+                                    }
+
                                 });
 
                             } else {
 
-                                connection.close();
+                                log.error("Error on AMQP connection for sending", done.cause());
                                 vertx.close();
                             }
 
                         });
-
-                    } else {
-
-                        log.error("Error on AMQP connection for sending", done.cause());
-                        vertx.close();
-                    }
-
-                });
-
             });
         });
-        */
 
         return ssc;
     }
