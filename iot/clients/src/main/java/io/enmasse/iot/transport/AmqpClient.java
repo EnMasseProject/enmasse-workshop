@@ -26,7 +26,9 @@ import io.vertx.proton.ProtonDelivery;
 import io.vertx.proton.ProtonHelper;
 import io.vertx.proton.ProtonReceiver;
 import io.vertx.proton.ProtonSender;
+import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.messaging.AmqpValue;
+import org.apache.qpid.proton.amqp.messaging.Data;
 import org.apache.qpid.proton.message.Message;
 
 import java.util.HashMap;
@@ -122,7 +124,8 @@ public class AmqpClient extends Client {
                 this.senders.put(address, sender);
             }
 
-            Message msg = ProtonHelper.message(message);
+            Message msg = ProtonHelper.message();
+            msg.setBody(new Data(new Binary(message.getBytes())));
             msg.setAddress(address);
 
             if (sender.isOpen()) {

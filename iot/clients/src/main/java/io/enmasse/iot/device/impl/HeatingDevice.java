@@ -20,15 +20,17 @@ import io.enmasse.iot.actuator.impl.Valve;
 import io.enmasse.iot.device.Device;
 import io.enmasse.iot.device.DeviceConfig;
 import io.enmasse.iot.sensor.impl.DHT22;
-import io.enmasse.iot.transport.AmqpClient;
 import io.enmasse.iot.transport.Client;
+import io.enmasse.iot.transport.MqttClient;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 /**
@@ -37,15 +39,6 @@ import java.util.Properties;
 public class HeatingDevice implements Device {
 
     protected final Logger log = LoggerFactory.getLogger(HeatingDevice.class);
-
-    private static final String HOSTNAME = "localhost";
-    private static final int PORT = 5672;
-    private static final String USERNAME = "device";
-    private static final String PASSWORD = "password";
-    private static final String TEMPERATURE_ADDRESS = "temperature";
-    private static final String CONTROL_ADDRESS_FORMAT = "control/%s";
-    private static final int UPDATE_INTERVAL = 1000;
-    private static final String DEVICE_ID = "device-id";
 
     private DHT22 dht22;
     private Valve valve;
@@ -77,7 +70,7 @@ public class HeatingDevice implements Device {
         String hostname = this.config.getProperty(DeviceConfig.HOSTNAME);
         int port = Integer.valueOf(this.config.getProperty(DeviceConfig.PORT));
 
-        this.client = new AmqpClient(hostname, port, this.vertx);
+        this.client = new MqttClient(hostname, port, this.vertx);
     }
 
     private void run() {
@@ -103,20 +96,20 @@ public class HeatingDevice implements Device {
 
             log.info("Connected to the service");
 
+            Client client = done.result();
+
+            client.receivedHandler(messageDelivery -> {
+                log.info("Received message on {} with payload {}",
+                        messageDelivery.address(), messageDelivery.message());
+            });
+
+            client.receive(this.config.getProperty(DeviceConfig.CONTROL_ADDRESS));
+
             int updateInterval = Integer.valueOf(this.config.getProperty(DeviceConfig.UPDATE_INTERVAL));
             String temperatureAddress = this.config.getProperty(DeviceConfig.TEMPERATURE_ADDRESS);
             this.vertx.setPeriodic(updateInterval, t -> {
 
                 int temperature = this.dht22.getTemperature();
-
-                Client client = done.result();
-
-                client.receivedHandler(messageDelivery -> {
-                    log.info("Received message on {} with payload {}",
-                            messageDelivery.address(), messageDelivery.message());
-                });
-
-                client.receive(this.config.getProperty(DeviceConfig.CONTROL_ADDRESS));
 
                 JsonObject json = new JsonObject();
                 json.put("device-id", this.config.getProperty(DeviceConfig.DEVICE_ID));
@@ -136,23 +129,21 @@ public class HeatingDevice implements Device {
 
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
-        // TODO : getting configuration from commandline or properties file ?
+        String configFile = System.getenv("DEVICE_PROPERTIES_FILE");
+        if (configFile == null) {
+            configFile = "device.properties";
+        }
 
         HeatingDevice heatingDevice = new HeatingDevice();
 
-        String deviceId = DEVICE_ID;
-
+        InputStream input = new FileInputStream(configFile);
         Properties config = new Properties();
-        config.setProperty(DeviceConfig.HOSTNAME, HOSTNAME);
-        config.setProperty(DeviceConfig.PORT, String.valueOf(PORT));
-        config.setProperty(DeviceConfig.USERNAME, USERNAME);
-        config.setProperty(DeviceConfig.PASSWORD, PASSWORD);
-        config.setProperty(DeviceConfig.TEMPERATURE_ADDRESS, TEMPERATURE_ADDRESS);
-        config.setProperty(DeviceConfig.CONTROL_ADDRESS, String.format(CONTROL_ADDRESS_FORMAT, deviceId));
-        config.setProperty(DeviceConfig.UPDATE_INTERVAL, String.valueOf(UPDATE_INTERVAL));
-        config.setProperty(DeviceConfig.DEVICE_ID, deviceId);
+        config.load(input);
+
+        String controlAddress = String.format("%s/%s", config.getProperty(DeviceConfig.CONTROL_PREFIX), config.getProperty(DeviceConfig.DEVICE_ID));
+        config.setProperty(DeviceConfig.CONTROL_ADDRESS, controlAddress);
 
         heatingDevice.init(config);
 

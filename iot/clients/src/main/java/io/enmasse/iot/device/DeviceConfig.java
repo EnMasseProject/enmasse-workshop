@@ -23,13 +23,12 @@ public class DeviceConfig {
 
     public static final String HOSTNAME = "service.hostname";
     public static final String PORT = "service.port";
-
-    public static final String USERNAME = "device.username";
-    public static final String PASSWORD = "device.password";
-
     public static final String TEMPERATURE_ADDRESS = "service.temperature.address";
+    public static final String CONTROL_PREFIX = "service.control.prefix";
     public static final String CONTROL_ADDRESS = "service.control.address";
-    public static final String UPDATE_INTERVAL = "device.update.interval";
 
     public static final String DEVICE_ID = "device.id";
+    public static final String USERNAME = "device.username";
+    public static final String PASSWORD = "device.password";
+    public static final String UPDATE_INTERVAL = "device.update.interval";
 }
