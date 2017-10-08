@@ -86,7 +86,7 @@ public class Thermostat extends AbstractVerticle {
         ProtonSender sender = connection.createSender(controlPrefix + "/" + deviceId);
 
         JsonObject object = new JsonObject();
-        object.put("deviceId", deviceId);
+        object.put("device-id", deviceId);
         object.put("operation", command);
         Message controlMessage = Message.Factory.create();
 

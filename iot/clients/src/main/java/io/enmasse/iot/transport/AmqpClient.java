@@ -27,7 +27,6 @@ import io.vertx.proton.ProtonHelper;
 import io.vertx.proton.ProtonReceiver;
 import io.vertx.proton.ProtonSender;
 import org.apache.qpid.proton.amqp.Binary;
-import org.apache.qpid.proton.amqp.messaging.AmqpValue;
 import org.apache.qpid.proton.amqp.messaging.Data;
 import org.apache.qpid.proton.message.Message;
 
@@ -157,7 +156,7 @@ public class AmqpClient extends Client {
 
         MessageDelivery messageDelivery =
                 new MessageDelivery(receiver.getSource().getAddress(),
-                        ((AmqpValue)message.getBody()).getValue().toString());
+                        ((Data)message.getBody()).getValue().getArray());
 
         this.receivedHandler.handle(messageDelivery);
     }
