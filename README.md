@@ -5,11 +5,23 @@ to a Spark cluster for analyzing the sensor data.
 
 ## Setting up
 
-### Installing OpenShift
+In this workshop we will be deploying 4 different components:
+
+* EnMasse messaging service
+* A Spark cluster for doing analytics
+* A Thermostat application performing command & control of devices
+* An IoT device simulator
+
+The first 2 will be deployed directly to OpenShift. The thermostat contorller will be built and
+deployed from your laptop, and the IoT simulator will be running locally on your laptop.
+
+![overview](images/overview.png)
+
+### (Optional) Installing OpenShift
 
 #### Downloading and installing minishift
 
-In this workshop, we'll be using [minishift](https://github.com/minishift/minishift/) to run OpenShift locally on our laptops. Minishift supports all major OS platforms.  Go to https://github.com/minishift/minishift/releases/tag/v1.6.0 and select the download for your OS.
+If you don't have an OpenShift cluster available, you can use [minishift](https://github.com/minishift/minishift/) to run OpenShift locally on your laptop. Minishift supports all major OS platforms.  Go to https://github.com/minishift/minishift/releases/tag/v1.6.0 and select the download for your OS.
 
 #### Starting minishift
 
@@ -24,9 +36,7 @@ Once this command completes, the OpenShift cluster should be ready to use.
 
 ### Exploring the console
 
-Take a few minutes to explore the openshift console. Run `minishift dashboard`, which will launch
-the OpenShift dashboard in your browser. You can login with username <b>developer</b> and password
-<b>developer</b>.
+Take a few minutes to familiarize yourself with the openshift console. If you use minishift, you can run `minishift dashboard` which will open a window in your web browser. With minishift, you can login with username <b>developer</b> and password <b>developer</b>.
 
 ### Installing EnMasse
 
@@ -49,15 +59,15 @@ Run the deployment script with `-h` option
 ./enmasse-0.13.0/enmasse-deploy.sh -h
 ```
 
-In this workshop, we will deploy using the standard (keycloak) authentication service, use the `enmasse` namespace, and tell it to deploy to our minishift cluster.
+In this workshop, we will deploy using the standard (keycloak) authentication service, use a unique id as your namespace, and tell it to deploy to the OpenShift cluster
 
 ```
-./enmasse-0.13.0/enmasse-deploy.sh -a standard -n enmasse -m https://$(minishift ip):8443
+./enmasse-0.13.0/enmasse-deploy.sh -a standard -n enmasse-<YOURID> -m https://$HOST:8443
 ```
 
 #### Startup
 
-You can observe the state of the EnMasse cluster using `oc get pods -n enmasse`. When all the pods are in the `Running` state, the cluster is ready. While waiting, go to the OpenShift console.
+You can observe the state of the EnMasse cluster using `oc get pods -n enmasse-<YOURID>`. When all the pods are in the `Running` state, the cluster is ready. While waiting, go to the OpenShift console.
 
 In the OpenShift console, you can see the different deployments for the various EnMasse components. You can go into each pod and look at the logs. If we go to the address controller log, you can see that its creating a 'default' address space.
 
@@ -70,7 +80,16 @@ oc extract secret/keycloak-credentials
 cat admin.password
 ```
 
-#### Address model
+The hostname for the keycloak administration interface can be found by running
+
+```
+oc get route keycloak -o jsonpath='{.spec.host}'
+```
+
+In the keycloak UI, create a new user, and a set of credentials for that user. Make sure the user is
+enabled, and that the credentials are not marked as temporary.
+
+#### Creating messaging addresses
 
 In EnMasse, you have the concepts of address spaces and addresses.
 
@@ -92,21 +111,21 @@ In the 'standard' address space, we have 4 types of addresses.
    * topic     - pub/sub on broker
 
 
-#### Creating addresses
+##### Creating addresses for this workshop
 
 Go to the console, and locate the 'console' route. Click on the link to get to the EnMasse console.
 
 Create an addresses for your IoT sensors to report metrics on:
 
-   * temperature - type multicast - used by devices to report temperature
-   * status - type multicast      - used by devices to report their status
-   * notifications - type queue   - used by spark to report anomalies
+   * temperature - type topic - used by devices to report temperature
+   * max         - type anycast - used by Spark driver to report the max temperature
 
 Then a few addresses for controlling devices
 
    * control/device1 - type queue - used to send control messages to device1
    * control/device2 - type queue - used to send control messages to device2
    * control/device3 - type queue - used to send control messages to device3
+
 
 ### Installing Spark
 
@@ -126,6 +145,11 @@ oc new-app oshinko-webui
 ```
 
 Using this UI, you are able to deploy an Apache Spark cluster inside OpenShift specifying the number of worker nodes you want (other than the default master).
+
+### Deploying the thermostat
+
+The thermostat application uses the [fabric8-maven-plugin](https://github.com/fabric8io/fabric8-maven-plugin) to create a docker image, an OpenShift deployment config, and deploy the thermostat into OpenShift. 
+
 
 TODO:
    * MQTT client simulator
