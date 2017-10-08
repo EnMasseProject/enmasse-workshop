@@ -16,12 +16,17 @@
 
 package io.enmasse.iot;
 
+import io.vertx.core.json.JsonObject;
+
 import java.io.Serializable;
 
 /**
  * Class representing a message from a device containing its id and temperature
  */
 public class DeviceTemperature implements Serializable {
+
+    public static final String JSON_DEVICEID = "device-id";
+    public static final String JSON_TEMPERATURE = "temperature";
 
     private final String deviceId;
     private final int temperature;
@@ -56,5 +61,39 @@ public class DeviceTemperature implements Serializable {
         return "DeviceTemperature(deviceId=" +
                 this.deviceId + ",temperature=" +
                 this.temperature + ")";
+    }
+
+    /**
+     * Convert current instance in a JSON object
+     *
+     * @return  JSON object representation
+     */
+    public JsonObject toJson() {
+        JsonObject json = new JsonObject();
+        json.put(JSON_DEVICEID, this.deviceId);
+        json.put(JSON_TEMPERATURE, this.temperature);
+        return json;
+    }
+
+    /**
+     * Return a DeviceTemperature instance from a JSON object
+     *
+     * @param json  JSON object
+     * @return  instance of DeviceTemperature
+     */
+    public static DeviceTemperature fromJson(JsonObject json) {
+        return new DeviceTemperature(json.getString(JSON_DEVICEID),
+                json.getInteger(JSON_TEMPERATURE));
+    }
+
+    /**
+     * Return a DeviceTemperature instance from a JSON string
+     *
+     * @param json  JSON string
+     * @return  instance of DeviceTemperature
+     */
+    public static DeviceTemperature fromJson(String json) {
+        JsonObject jsonObject = new JsonObject(json);
+        return fromJson(jsonObject);
     }
 }
