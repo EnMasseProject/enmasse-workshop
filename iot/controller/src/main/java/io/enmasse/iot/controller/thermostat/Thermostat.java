@@ -68,7 +68,7 @@ public class Thermostat extends AbstractVerticle {
 
     private void handleNotification(ProtonDelivery delivery, Message message) {
         JsonObject object = new JsonObject(Buffer.buffer(((Data) message.getBody()).getValue().getArray()));
-        String deviceId = object.getString("deviceId");
+        String deviceId = object.getString("device-id");
         int temperature = object.getInteger("temperature");
 
         adjustTemperature(deviceId, temperature);
@@ -113,14 +113,13 @@ public class Thermostat extends AbstractVerticle {
         String username = env.getOrDefault("MESSAGING_SERVICE_USERNAME", "test");
         String password = env.getOrDefault("MESSAGING_SERVICE_PASSWORD", "test");
 
-        // TODO: Change this
-        String notificationAddress = env.getOrDefault("NOTIFICATION_ADDRESS", "alarm");
+        String maxAddress = env.getOrDefault("MAX_ADDRESS", "max");
         String controlPrefix = env.getOrDefault("COMMAND_CONTROL_PREFIX", "control");
 
         int minTemp = Integer.parseInt(env.getOrDefault("MIN_TEMPERATURE", "15"));
         int maxTemp = Integer.parseInt(env.getOrDefault("MAX_TEMPERATURE", "25"));
 
         Vertx vertx = Vertx.vertx();
-        vertx.deployVerticle(new Thermostat(messagingHost, messagingPort, username, password, notificationAddress, controlPrefix, minTemp, maxTemp));
+        vertx.deployVerticle(new Thermostat(messagingHost, messagingPort, username, password, maxAddress, controlPrefix, minTemp, maxTemp));
     }
 }
