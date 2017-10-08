@@ -17,7 +17,6 @@
 package io.enmasse.iot;
 
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
 import io.vertx.proton.ProtonClient;
 import io.vertx.proton.ProtonConnection;
 import io.vertx.proton.ProtonHelper;
@@ -28,12 +27,10 @@ import org.apache.qpid.proton.amqp.messaging.Data;
 import org.apache.qpid.proton.amqp.messaging.Section;
 import org.apache.qpid.proton.message.Message;
 import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.storage.StorageLevel;
 import org.apache.spark.streaming.Duration;
 import org.apache.spark.streaming.amqp.AMQPUtils;
-import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaPairDStream;
 import org.apache.spark.streaming.api.java.JavaReceiverInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
@@ -63,9 +60,6 @@ public class TemperatureAnalyzer {
     private static String password = null;
     private static String temperatureAddress = "temperature";
     private static String maxAddress = "max";
-    private static String alarmAddress = "alarm";
-
-    private static int alarmThreshold = 30;
 
     public static void main(String[] args) throws InterruptedException {
 
@@ -177,26 +171,8 @@ public class TemperatureAnalyzer {
                                     log.info("... message sent");
                                     maxSender.close();
 
-                                    if (deviceTemperature.temperature() > alarmThreshold) {
-
-                                        ProtonSender alarmSender = connection.createSender(alarmAddress);
-                                        alarmSender.open();
-
-                                        log.info("Alarm !!! Sending {} to alarm address ...", deviceTemperature);
-                                        message.setAddress(alarmAddress);
-                                        alarmSender.send(message, alarmDelivery -> {
-
-                                            log.info("... message sent");
-                                            alarmSender.close();
-                                            connection.close();
-                                            vertx.close();
-                                        });
-
-                                    } else {
-
-                                        connection.close();
-                                        vertx.close();
-                                    }
+                                    connection.close();
+                                    vertx.close();
 
                                 });
 
