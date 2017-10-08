@@ -20,12 +20,17 @@ import io.enmasse.iot.sensor.HumiditySensor;
 import io.enmasse.iot.sensor.TemperatureSensor;
 
 import java.util.Properties;
+import java.util.Random;
 
 /**
  * Simulated DHT22 temperature and humidity sensor
  * @see <a href="https://learn.adafruit.com/dht/overview">DHTxx family</a>
  */
 public class DHT22 implements TemperatureSensor, HumiditySensor {
+
+    private int min;
+    private int max;
+    private Random random = new Random();
 
     @Override
     public int getHumidity() {
@@ -34,11 +39,13 @@ public class DHT22 implements TemperatureSensor, HumiditySensor {
 
     @Override
     public int getTemperature() {
-        return 0;
+        int temp = this.min + random.nextInt(this.max - this.min);
+        return temp;
     }
 
     @Override
     public void init(Properties config) {
-
+        this.min = Integer.valueOf(config.getProperty("min"));
+        this.max = Integer.valueOf(config.getProperty("max"));
     }
 }

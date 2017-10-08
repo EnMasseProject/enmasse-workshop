@@ -20,6 +20,7 @@ import io.enmasse.iot.actuator.impl.Valve;
 import io.enmasse.iot.device.Device;
 import io.enmasse.iot.device.DeviceConfig;
 import io.enmasse.iot.sensor.impl.DHT22;
+import io.enmasse.iot.transport.AmqpClient;
 import io.enmasse.iot.transport.Client;
 import io.enmasse.iot.transport.MqttClient;
 import io.vertx.core.AsyncResult;
@@ -63,14 +64,17 @@ public class HeatingDevice implements Device {
         log.info("Init with config {}", config);
 
         // initializing sensors and actuators
-        this.dht22.init(null);
+        Properties configDht22 = new Properties();
+        configDht22.setProperty("min", this.config.getProperty(DeviceConfig.DHT22_TEMPERATURE_MIN));
+        configDht22.setProperty("max", this.config.getProperty(DeviceConfig.DHT22_TEMPERATURE_MAX));
+        this.dht22.init(configDht22);
         this.valve.init(null);
 
         // getting hostname and port for client connection
         String hostname = this.config.getProperty(DeviceConfig.HOSTNAME);
         int port = Integer.valueOf(this.config.getProperty(DeviceConfig.PORT));
 
-        this.client = new MqttClient(hostname, port, this.vertx);
+        this.client = new AmqpClient(hostname, port, this.vertx);
     }
 
     private void run() {
