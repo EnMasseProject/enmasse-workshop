@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.util.Properties;
 
 /**
@@ -57,6 +58,7 @@ public class HeatingDevice implements Device {
         this.valve = new Valve();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void init(Properties config) {
 
@@ -74,7 +76,17 @@ public class HeatingDevice implements Device {
         String hostname = this.config.getProperty(DeviceConfig.HOSTNAME);
         int port = Integer.valueOf(this.config.getProperty(DeviceConfig.PORT));
 
-        this.client = new AmqpClient(hostname, port, this.vertx);
+        try {
+            // getting and creating the transport class to use
+            Class transportClass = Class.forName(this.config.getProperty(DeviceConfig.TRANSPORT_CLASS));
+            Constructor constructor = transportClass.getConstructor(String.class, int.class, Vertx.class);
+            this.client = (Client) constructor.newInstance(hostname, port, this.vertx);
+            log.info("Using {} as transport", transportClass);
+        } catch (Exception e) {
+            log.error("Transport class instantiation error ...", e);
+            this.client = new AmqpClient(hostname, port, this.vertx);
+            log.info("Using default {} as transport", AmqpClient.class);
+        }
     }
 
     private void run() {

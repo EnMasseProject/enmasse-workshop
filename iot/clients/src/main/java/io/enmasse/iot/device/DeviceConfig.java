@@ -31,6 +31,7 @@ public class DeviceConfig {
     public static final String USERNAME = "device.username";
     public static final String PASSWORD = "device.password";
     public static final String UPDATE_INTERVAL = "device.update.interval";
+    public static final String TRANSPORT_CLASS = "device.transport.class";
 
     public static final String DHT22_TEMPERATURE_MIN = "device.dht22.temperature.min";
     public static final String DHT22_TEMPERATURE_MAX = "device.dht22.temperature.max";
