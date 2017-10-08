@@ -12,8 +12,8 @@ In this workshop we will be deploying 4 different components:
 * A Thermostat application performing command & control of devices
 * An IoT device simulator
 
-The first 2 will be deployed directly to OpenShift. The thermostat contorller will be built and
-deployed from your laptop, and the IoT simulator will be running locally on your laptop.
+The first 2 will be deployed directly to OpenShift. The thermostat controller will be built and
+deployed to OpenShift from your laptop, and the IoT simulator will be running locally on your laptop.
 
 ![overview](images/overview.png)
 
@@ -146,16 +146,23 @@ oc new-app oshinko-webui
 
 Using this UI, you are able to deploy an Apache Spark cluster inside OpenShift specifying the number of worker nodes you want (other than the default master).
 
+### Deploying spark driver
+
+TODO
+
 ### Deploying the thermostat
 
 The thermostat application uses the [fabric8-maven-plugin](https://github.com/fabric8io/fabric8-maven-plugin) to create a docker image, an OpenShift deployment config, and deploy the thermostat into OpenShift. 
 
+TODO: Build instructions
 
-TODO:
-   * MQTT client simulator
-      * Run publishers simulating IoT devices
-      * Run subscribers as consumer application showing data
-   * Real time streaming analytics using Spark Streaming ([EnMasse IoT demo](https://github.com/ppatierno/enmasse-iot-demo/blob/master/spark.md))
-      * Deploy Spark cluster
-      * Deploy Spark driver
-   * ...
+
+### Running the IoT simulator
+
+#### Using maven/IDE
+
+TODO: Instructions
+
+#### From pre-built jars
+
+TODO: Instructions
