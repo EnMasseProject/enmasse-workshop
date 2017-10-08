@@ -17,6 +17,7 @@
 package io.enmasse.iot.transport;
 
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.proton.ProtonClient;
@@ -81,10 +82,12 @@ public class AmqpClient extends Client {
                 } else {
                     this.receivers = new HashMap<>();
                 }
+                connectHandler.handle(Future.succeededFuture(this));
 
             } else {
 
                 log.error("Error connecting to the service", done.cause());
+                connectHandler.handle(Future.failedFuture(done.cause()));
             }
         });
     }

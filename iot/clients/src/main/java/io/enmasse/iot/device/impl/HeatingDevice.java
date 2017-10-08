@@ -24,6 +24,7 @@ import io.enmasse.iot.transport.AmqpClient;
 import io.enmasse.iot.transport.Client;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -106,7 +107,7 @@ public class HeatingDevice implements Device {
             String temperatureAddress = this.config.getProperty(DeviceConfig.TEMPERATURE_ADDRESS);
             this.vertx.setPeriodic(updateInterval, t -> {
 
-                int temp = this.dht22.getTemperature();
+                int temperature = this.dht22.getTemperature();
 
                 Client client = done.result();
 
@@ -117,8 +118,12 @@ public class HeatingDevice implements Device {
 
                 client.receive(this.config.getProperty(DeviceConfig.CONTROL_ADDRESS));
 
-                log.info("Sending temperature value = {} ...", temp);
-                client.send(temperatureAddress, String.valueOf(temp), v -> {
+                JsonObject json = new JsonObject();
+                json.put("device-id", this.config.getProperty(DeviceConfig.DEVICE_ID));
+                json.put("temperature", temperature);
+
+                log.info("Sending temperature value = {} ...", temperature);
+                client.send(temperatureAddress, json.toString(), v -> {
                     log.info("... sent");
                 });
 
