@@ -165,10 +165,12 @@ public class HeatingDevice implements Device {
 
     public static void main(String[] args) throws IOException {
 
-        String configFile = System.getenv("DEVICE_PROPERTIES_FILE");
-        if (configFile == null) {
-            configFile = "device.properties";
+        if (args.length < 1) {
+            System.err.println("Missing config file parameter");
+            System.exit(1);
         }
+
+        String configFile = args[0];
 
         HeatingDevice heatingDevice = new HeatingDevice();
 

@@ -131,7 +131,7 @@ Then a few addresses for controlling devices
    * control/device3 - type queue - used to send control messages to device3
 
 
-### Installing Spark
+### Installing Apache Spark
 
 An official support for Apache Spark on OpenShift is provided by the [radanalytics.io](https://radanalytics.io/) project which provides
 the Oshinko application with a web UI for deploying a Spark cluster.
@@ -152,7 +152,7 @@ Using this UI, you are able to deploy an Apache Spark cluster inside OpenShift s
 
 ![overview](images/oshinko_ui_spark.png)
 
-### Deploying Spark driver
+### Deploying the "Temperature Analyzer" Spark driver
 
 The `spark-driver` directory provides the Spark Streaming driver application and a Docker image for running the related Spark driver inside the cluster. This application can be packaged running the following command from such directory.
 
@@ -176,7 +176,7 @@ Using such template from the catalog, it's possible to deploy the Spark driver s
 
 ![overview](images/spark_driver_template.png)
 
-### Deploying the thermostat
+### Deploying the "Thermostat" application
 
 The thermostat application uses the [fabric8-maven-plugin](https://github.com/fabric8io/fabric8-maven-plugin) to create a docker image, an OpenShift deployment config, and deploy the thermostat into OpenShift.
 
@@ -201,8 +201,14 @@ mvn fabric8:resource fabric8:deploy
 
 The thermostat will be deployed to the OpenShift cluster. The pod will be named `thermostat-$number` where `$number` is incremented each time you run the deploy command.
 
+### Running the IoT simulated devices
 
-### Running the IoT simulator
+Heating simulated devices are provided for simulating data sent to the IoT system and receiving messages.
+The devices supports two protocols, AMQP and MQTT, which are configurable.
+The Heating device application :
+
+* get temperature values from a simulated DHT22 temperature sensor sending them to the _temperature_ address periodically
+* receive commands for opening/closing a simulated valve on the _control/<device-id>_ address
 
 #### Using maven/IDE
 
