@@ -106,7 +106,7 @@ public class TemperatureAnalyzer {
                                 return new Some<>(deviceTemperature);
                             } else if (section instanceof Data) {
                                 Binary data = ((Data)section).getValue();
-                                DeviceTemperature deviceTemperature = DeviceTemperature.fromJson(new String(data.getArray()));
+                                DeviceTemperature deviceTemperature = DeviceTemperature.fromJson(new String(data.getArray(), "UTF-8"));
                                 return new Some<>(deviceTemperature);
                             } else {
                                 return null;
