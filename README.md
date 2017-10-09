@@ -208,7 +208,7 @@ The devices supports two protocols, AMQP and MQTT, which are configurable.
 The Heating device application :
 
 * get temperature values from a simulated DHT22 temperature sensor sending them to the _temperature_ address periodically
-* receive commands for opening/closing a simulated valve on the _control/<device-id>_ address
+* receive commands for opening/closing a simulated valve on the _control/[device-id]_ address
 
 #### Using maven/IDE
 
