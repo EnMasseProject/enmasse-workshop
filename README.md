@@ -59,15 +59,18 @@ Run the deployment script with `-h` option
 ./enmasse-0.13.0/enmasse-deploy.sh -h
 ```
 
-In this workshop, we will deploy using the standard (keycloak) authentication service, use a unique id as your namespace, and tell it to deploy to the OpenShift cluster
+In this workshop, we will deploy using the standard (keycloak) authentication service, use a unique id as your namespace, and tell it to deploy to the OpenShift cluster.
+Set $NAMSPACE to the OpenShift project you will be using through this workshop:
 
 ```
-./enmasse-0.13.0/enmasse-deploy.sh -a standard -n workshop-<YOURID> -m https://$HOST:8443
+export NAMESPACE=
+./enmasse-0.13.0/enmasse-deploy.sh -a standard -n $NAMESPACE -m https://$HOST:8443
 ```
+
 
 #### Startup
 
-You can observe the state of the EnMasse cluster using `oc get pods -n workshop-<YOURID>`. When all the pods are in the `Running` state, the cluster is ready. While waiting, go to the OpenShift console.
+You can observe the state of the EnMasse cluster using `oc get pods -n $NAMESPACE`. When all the pods are in the `Running` state, the cluster is ready. While waiting, go to the OpenShift console.
 
 In the OpenShift console, you can see the different deployments for the various EnMasse components. You can go into each pod and look at the logs. If we go to the address controller log, you can see that its creating a 'default' address space.
 
@@ -76,13 +79,13 @@ In the OpenShift console, you can see the different deployments for the various 
 Our cluster does not yet have any users created, so it cannot create addresses. We therefore have to create a user using the keycloak interface. By default, the keycloak service is not exposed, so we need to expose that service.
 
 ```
-oc expose service standard-authservice --name=keycloak -n workshop-<YOURID> --port 8080
+oc expose service standard-authservice --name=keycloak -n $NAMESPACE --port 8080
 ```
 
 Go to the OpenShift console, application -> routes, and click on the hostname for the 'keycloak' route. This should bring you to the keycloak admin console. The admin user is protected by an automatically generated password, so we need to extract that as well before being able to create users.
 
 ```
-oc extract secret/keycloak-credentials -n workshop-<YOURID>
+oc extract secret/keycloak-credentials -n $NAMESPACE
 cat admin.username
 cat admin.password
 ```
@@ -136,7 +139,7 @@ the Oshinko application with a web UI for deploying a Spark cluster.
 First, you have to get the Oshinko resources into your project.
 
 ```
-oc create -f https://radanalytics.io/resources.yaml -n workshop-<YOURID>
+oc create -f https://radanalytics.io/resources.yaml -n $NAMESPACE
 ```
 
 Then start the Oshinko Web UI application.
