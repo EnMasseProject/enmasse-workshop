@@ -68,11 +68,6 @@ public class MqttClient extends Client {
                     this.receivedHandler.handle(messageDelivery);
                 });
 
-                this.client.publishCompletionHandler(messageId -> {
-
-                    this.sendCompletionHandler.handle(null);
-                });
-
                 connectHandler.handle(Future.succeededFuture(this));
 
             } else {
@@ -93,10 +88,15 @@ public class MqttClient extends Client {
     }
 
     @Override
-    public void send(String address, byte[] data, Handler<Void> sendCompletionHandler) {
+    public void send(String address, byte[] data, Handler<String> sendCompletionHandler) {
 
         this.vertx.runOnContext(c -> {
-            this.client.publish(address, Buffer.buffer(data), MqttQoS.AT_MOST_ONCE, false, false);
+            this.client.publish(address, Buffer.buffer(data), MqttQoS.AT_MOST_ONCE, false, false, messageId -> {
+
+                if (sendCompletionHandler != null) {
+                    sendCompletionHandler.handle(messageId.toString());
+                }
+            });
         });
     }
 

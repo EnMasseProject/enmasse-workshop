@@ -148,7 +148,7 @@ public class HeatingDevice implements Device {
 
                 log.info("Sending temperature value = {} ...", temperature);
                 client.send(temperatureAddress, json.toString().getBytes(), v -> {
-                    log.info("... sent");
+                    log.info("... sent {}", v);
                 });
             });
 

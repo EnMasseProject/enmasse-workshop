@@ -112,7 +112,7 @@ public class AmqpClient extends Client {
     }
 
     @Override
-    public void send(String address, byte[] data, Handler<Void> sendCompletionHandler) {
+    public void send(String address, byte[] data, Handler<String> sendCompletionHandler) {
 
         this.vertx.runOnContext(c -> {
             ProtonSender sender = this.senders.get(address);
@@ -131,7 +131,9 @@ public class AmqpClient extends Client {
 
                 sender.send(msg, delivery -> {
 
-                    this.sendCompletionHandler.handle(null);
+                    if (sendCompletionHandler != null) {
+                        sendCompletionHandler.handle(new String(delivery.getTag()));
+                    }
                 });
             }
         });

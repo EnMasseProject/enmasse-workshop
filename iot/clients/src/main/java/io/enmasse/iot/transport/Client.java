@@ -35,7 +35,6 @@ public abstract class Client {
     protected final int port;
     protected final Vertx vertx;
     protected Handler<MessageDelivery> receivedHandler;
-    protected Handler<Void> sendCompletionHandler;
 
     /**
      * Constructor
@@ -83,9 +82,19 @@ public abstract class Client {
      *
      * @param address   address to send the message
      * @param data   data to send
-     * @param sendCompletionHandler handler to call on sent completion
+     * @param sendCompletionHandler handler to call on sent completion providing a message identifier
      */
-    public abstract void send(String address, byte[] data, Handler<Void> sendCompletionHandler);
+    public abstract void send(String address, byte[] data, Handler<String> sendCompletionHandler);
+
+    /**
+     * Send a message to the remote system
+     *
+     * @param address   address to send the message
+     * @param data  data to send
+     */
+    public void send(String address, byte[] data) {
+        this.send(address, data, null);
+    }
 
     /**
      * Subscribe to receive messages
