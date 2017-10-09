@@ -82,10 +82,10 @@ public abstract class Client {
      * Send a message to the remote system
      *
      * @param address   address to send the message
-     * @param message   message to send
+     * @param data   data to send
      * @param sendCompletionHandler handler to call on sent completion
      */
-    public abstract void send(String address, String message, Handler<Void> sendCompletionHandler);
+    public abstract void send(String address, byte[] data, Handler<Void> sendCompletionHandler);
 
     /**
      * Subscribe to receive messages

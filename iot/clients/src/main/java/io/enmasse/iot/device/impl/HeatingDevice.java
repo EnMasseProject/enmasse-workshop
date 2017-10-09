@@ -147,7 +147,7 @@ public class HeatingDevice implements Device {
                 json.put("temperature", temperature);
 
                 log.info("Sending temperature value = {} ...", temperature);
-                client.send(temperatureAddress, json.toString(), v -> {
+                client.send(temperatureAddress, json.toString().getBytes(), v -> {
                     log.info("... sent");
                 });
             });

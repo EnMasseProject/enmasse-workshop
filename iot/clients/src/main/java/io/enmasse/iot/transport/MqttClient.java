@@ -64,7 +64,7 @@ public class MqttClient extends Client {
 
                 this.client.publishHandler(m -> {
 
-                    MessageDelivery messageDelivery = new MessageDelivery(m.topicName(), m.payload().toString());
+                    MessageDelivery messageDelivery = new MessageDelivery(m.topicName(), m.payload().getBytes());
                     this.receivedHandler.handle(messageDelivery);
                 });
 
@@ -93,10 +93,10 @@ public class MqttClient extends Client {
     }
 
     @Override
-    public void send(String address, String message, Handler<Void> sendCompletionHandler) {
+    public void send(String address, byte[] data, Handler<Void> sendCompletionHandler) {
 
         this.vertx.runOnContext(c -> {
-            this.client.publish(address, Buffer.buffer(message), MqttQoS.AT_MOST_ONCE, false, false);
+            this.client.publish(address, Buffer.buffer(data), MqttQoS.AT_MOST_ONCE, false, false);
         });
     }
 
