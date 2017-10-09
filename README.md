@@ -17,6 +17,10 @@ deployed to OpenShift from your laptop, and the IoT simulator will be running lo
 
 ![overview](images/overview.png)
 
+A more detailed deployment.
+
+![deployment](images/demo_deployment.png)
+
 ### (Optional) Installing OpenShift
 
 #### Downloading and installing minishift
