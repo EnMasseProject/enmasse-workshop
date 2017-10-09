@@ -210,10 +210,30 @@ The Heating device application :
 * get temperature values from a simulated DHT22 temperature sensor sending them to the _temperature_ address periodically
 * receive commands for opening/closing a simulated valve on the _control/[device-id]_ address
 
+The console application can be configured using a `device.properties` file which provides following parameters :
+
+* _service.hostname_ : hostname of the EnMasse messaging service to connect
+* _service.port_ : port of the EnMasse messaging service to connect
+* _service.temperature.address_ : address on which temperature values will be sent (should not be changed from the _temperature_ value)
+* _service.control.prefix_ : prefix for defining the control address for receiving command (should not be changed from the _contro_ value)
+* _device.id_ : device identifier
+* _device.username_ : device username (from Keyclock) for EnMasse authentication
+* _device.password_ : device password (from Keyclock) for EnMasse authentication
+* _device.update.interval_ : periodic interval for sending temperature values
+* _device.transport.class_ : transport class to use in terms of protocol. Possible values are _io.enmasse.iot.transport.AmqpClient_ for AMQP and _io.enmasse.iot.transport.MqttClient_ for MQTT
+* _device.dht22.temperature.min_ : minimum temperature provided by the simulated DHT22 sensor
+* _device.dht22.temperature.max_ : maximum temperature provided by the simulated DHT22 sensor
+
 #### Using maven/IDE
 
 TODO: Instructions
 
 #### From pre-built jars
 
-TODO: Instructions
+The provided `heating-device.jar` can be used for starting a simulated heating device with the following command.
+
+```
+java -Dlog4j.properties=file:<path-to-log4j-properties-file> -jar heating-device.jar <path-to-device-properties-file>
+```
+
+The console application needs only one argument which is the path to the `device.properties` file which contains the device configuration.
