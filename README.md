@@ -12,7 +12,7 @@ In this workshop we will be deploying 4 different components:
 * A Thermostat application performing command & control of devices
 * An IoT device simulator
 
-The first 2 will be deployed directly to OpenShift. The thermostat controller will be built and
+The first 2 will be deployed directly to OpenShift. The thermostat will be built and
 deployed to OpenShift from your laptop, and the IoT simulator will be running locally on your laptop.
 
 ![overview](images/overview.png)
@@ -156,15 +156,15 @@ TODO
 The thermostat application uses the [fabric8-maven-plugin](https://github.com/fabric8io/fabric8-maven-plugin) to create a docker image, an OpenShift deployment config, and deploy the thermostat into OpenShift. 
 
 First, modify the thermostat configuration in
-`iot/controller/src/main/resources/config.properties`. Make sure that `service.hostname` matches
+`iot/thermostat/src/main/resources/config.properties`. Make sure that `service.hostname` matches
 that of the messaging service, and that `service.username` and `service.password` matches the
 credentials you created in keycloak. You can also change the addresses used in this workshop, but it
-is not needed for the controller to run.
+is not needed for the thermostat to run.
 
 To build the application and a docker image:
 
 ```
-cd iot/controller
+cd iot/thermostat
 mvn -Dfabric8.mode=openshift package fabric8:build
 ```
 
@@ -174,7 +174,7 @@ To deploy the image to the OpenShift cluster
 mvn fabric8:resource fabric8:deploy
 ```
 
-The thermostat will be deployed to the OpenShift cluster. The pod will be named `controller-$number` where `$number` is incremented each time you run the deploy command.
+The thermostat will be deployed to the OpenShift cluster. The pod will be named `thermostat-$number` where `$number` is incremented each time you run the deploy command.
 
 
 ### Running the IoT simulator
