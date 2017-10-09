@@ -85,9 +85,9 @@ public class Thermostat extends AbstractVerticle {
     }
 
     private void handleNotification(ProtonDelivery delivery, Message message) {
-        JsonObject object = new JsonObject(Buffer.buffer(((Data) message.getBody()).getValue().getArray()));
-        String deviceId = object.getString("device-id");
-        int temperature = object.getInteger("temperature");
+        JsonObject json = new JsonObject(Buffer.buffer(((Data) message.getBody()).getValue().getArray()));
+        String deviceId = json.getString("device-id");
+        int temperature = json.getInteger("temperature");
 
         adjustTemperature(deviceId, temperature);
     }
@@ -103,16 +103,20 @@ public class Thermostat extends AbstractVerticle {
     private void sendCommand(String deviceId, String command) {
         ProtonSender sender = connection.createSender(controlPrefix + "/" + deviceId);
 
-        JsonObject object = new JsonObject();
-        object.put("device-id", deviceId);
-        object.put("operation", command);
+        JsonObject json = new JsonObject();
+        json.put("device-id", deviceId);
+        json.put("operation", command);
         Message controlMessage = Message.Factory.create();
 
-        controlMessage.setBody(new Data(new Binary(object.toBuffer().getBytes())));
+        controlMessage.setBody(new Data(new Binary(json.toBuffer().getBytes())));
 
         sender.openHandler(link -> {
             if (link.succeeded()) {
-                sender.send(controlMessage, delivery -> sender.close());
+                log.info("Sending control {} ...", json);
+                sender.send(controlMessage, delivery -> {
+                    log.info("... sent {}", new String(delivery.getTag()));
+                    sender.close();
+                });
             } else {
                 log.info("Error sending control message to {}", deviceId);
             }
