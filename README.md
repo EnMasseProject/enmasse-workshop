@@ -150,13 +150,35 @@ oc new-app oshinko-webui
 
 Using this UI, you are able to deploy an Apache Spark cluster inside OpenShift specifying the number of worker nodes you want (other than the default master).
 
-### Deploying spark driver
+![overview](images/oshinko_ui_spark.png)
 
-TODO
+### Deploying Spark driver
+
+The `spark-driver` directory provides the Spark Streaming driver application and a Docker image for running the related Spark driver inside the cluster. This application can be packaged running the following command from such directory.
+
+```
+mvn package -Pbuild-docker-image
+```
+
+This command will package the application and build a Docker image ready to be deployed on OpenShift.
+In order to deploy the Spark driver, an OpenShift template is available which can be made available with following command.
+
+```
+oc create -f <path-to-repo>/spark-driver/target/fabric8/spark-driver-template.yaml
+```
+
+Using such template from the catalog, it's possible to deploy the Spark driver specifying following template parameters :
+
+* _SPARK_MASTER_HOST_ : hostname of the Spark master node
+* _SPARK_MASTER_PORT_ : the port of the Spark master node (default value is 7077)
+* _SPARK_DRIVER_USERNAME_ : username provided by Keycloak for driver authentication with EnMasse
+* _SPARK_DRIVER_PASSWORD_ : password provided by Keycloak for driver authentication with EnMasse
+
+![overview](images/spark_driver_template.png)
 
 ### Deploying the thermostat
 
-The thermostat application uses the [fabric8-maven-plugin](https://github.com/fabric8io/fabric8-maven-plugin) to create a docker image, an OpenShift deployment config, and deploy the thermostat into OpenShift. 
+The thermostat application uses the [fabric8-maven-plugin](https://github.com/fabric8io/fabric8-maven-plugin) to create a docker image, an OpenShift deployment config, and deploy the thermostat into OpenShift.
 
 First, modify the thermostat configuration in
 `iot/thermostat/src/main/resources/config.properties`. Make sure that `service.hostname` matches
