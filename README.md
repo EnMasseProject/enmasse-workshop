@@ -224,7 +224,7 @@ The console application can be configured using a `device.properties` file which
 * _device.dht22.temperature.min_ : minimum temperature provided by the simulated DHT22 sensor
 * _device.dht22.temperature.max_ : maximum temperature provided by the simulated DHT22 sensor
 
-#### Using maven/IDE
+#### Using Maven/IDE
 
 TODO: Instructions
 
@@ -233,7 +233,7 @@ TODO: Instructions
 The provided `heating-device.jar` can be used for starting a simulated heating device with the following command.
 
 ```
-java -Dlog4j.properties=file:<path-to-log4j-properties-file> -jar heating-device.jar <path-to-device-properties-file>
+java -jar heating-device.jar <path-to-device-properties-file>
 ```
 
 The console application needs only one argument which is the path to the `device.properties` file which contains the device configuration.
