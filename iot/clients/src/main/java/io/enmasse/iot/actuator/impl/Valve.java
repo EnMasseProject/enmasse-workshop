@@ -17,6 +17,8 @@
 package io.enmasse.iot.actuator.impl;
 
 import io.enmasse.iot.actuator.Actuator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
@@ -24,6 +26,7 @@ import java.util.Properties;
  * Simulated valve
  */
 public class Valve implements Actuator {
+    protected final Logger log = LoggerFactory.getLogger(Valve.class);
 
     @Override
     public void init(Properties config) {
@@ -31,10 +34,10 @@ public class Valve implements Actuator {
     }
 
     public void open() {
-
+        log.info("Opening valve!");
     }
 
     public void close() {
-
+        log.info("Closing valve!");
     }
 }

@@ -12,7 +12,9 @@ import org.apache.qpid.proton.message.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 public class Thermostat extends AbstractVerticle {
     private static final Logger log = LoggerFactory.getLogger(Thermostat.class);
@@ -86,7 +88,7 @@ public class Thermostat extends AbstractVerticle {
         ProtonSender sender = connection.createSender(controlPrefix + "/" + deviceId);
 
         JsonObject object = new JsonObject();
-        object.put("deviceId", deviceId);
+        object.put("device-id", deviceId);
         object.put("operation", command);
         Message controlMessage = Message.Factory.create();
 
@@ -106,20 +108,28 @@ public class Thermostat extends AbstractVerticle {
         sender.open();
     }
 
-    public static void main(String [] args) {
-        Map<String, String> env = System.getenv();
-        String messagingHost = env.getOrDefault("MESSAGING_SERVICE_HOST", "messaging.enmasse.svc");
-        int messagingPort = Integer.parseInt(env.getOrDefault("MESSAGING_SERVICE_PORT", "5672"));
-        String username = env.getOrDefault("MESSAGING_SERVICE_USERNAME", "test");
-        String password = env.getOrDefault("MESSAGING_SERVICE_PASSWORD", "test");
+    public static void main(String [] args) throws IOException {
+        Properties properties = loadProperties("config.properties");
+        String messagingHost = properties.getProperty("service.hostname", "messaging.enmasse.svc");
+        int messagingPort = Integer.parseInt(properties.getProperty("service.port", "5672"));
+        String username = properties.getProperty("service.username", "test");
+        String password = properties.getProperty("service.password", "test");
 
-        String maxAddress = env.getOrDefault("MAX_ADDRESS", "max");
-        String controlPrefix = env.getOrDefault("COMMAND_CONTROL_PREFIX", "control");
+        String maxAddress = properties.getProperty("address.max", "max");
+        String controlPrefix = properties.getProperty("address.control.prefix", "control");
 
-        int minTemp = Integer.parseInt(env.getOrDefault("MIN_TEMPERATURE", "15"));
-        int maxTemp = Integer.parseInt(env.getOrDefault("MAX_TEMPERATURE", "25"));
+        int minTemp = Integer.parseInt(properties.getProperty("control.temperature.min", "15"));
+        int maxTemp = Integer.parseInt(properties.getProperty("control.temperature.max", "25"));
 
         Vertx vertx = Vertx.vertx();
         vertx.deployVerticle(new Thermostat(messagingHost, messagingPort, username, password, maxAddress, controlPrefix, minTemp, maxTemp));
+    }
+
+    private static Properties loadProperties(String resource) throws IOException {
+        Properties properties = new Properties();
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        InputStream stream = loader.getResourceAsStream(resource);
+        properties.load(stream);
+        return properties;
     }
 }

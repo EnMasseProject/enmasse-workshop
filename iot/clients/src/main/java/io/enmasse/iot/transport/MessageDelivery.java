@@ -22,17 +22,17 @@ package io.enmasse.iot.transport;
 public class MessageDelivery {
 
     private final String address;
-    private final String message;
+    private final byte[] data;
 
     /**
      * Constructor
      *
      * @param address   address on which message was delivered
-     * @param message   message body
+     * @param data      message body
      */
-    public MessageDelivery(String address, String message) {
+    public MessageDelivery(String address, byte[] data) {
         this.address = address;
-        this.message = message;
+        this.data = data;
     }
 
     /**
@@ -45,7 +45,7 @@ public class MessageDelivery {
     /**
      * @return  message body
      */
-    public String message() {
-        return this.message;
+    public byte[] message() {
+        return this.data;
     }
 }

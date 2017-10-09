@@ -25,6 +25,7 @@ import io.enmasse.iot.transport.Client;
 import io.enmasse.iot.transport.MqttClient;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,12 +118,26 @@ public class HeatingDevice implements Device {
             client.receivedHandler(messageDelivery -> {
                 log.info("Received message on {} with payload {}",
                         messageDelivery.address(), messageDelivery.message());
+
+                JsonObject object = new JsonObject(Buffer.buffer(messageDelivery.message()));
+                String deviceId = object.getString("device-id");
+                if (!deviceId.equals(this.config.getProperty(DeviceConfig.DEVICE_ID))) {
+                    log.error("Received control message for some other device with id " + deviceId);
+                } else {
+                    String operation = object.getString("operation");
+                    if ("open".equals(operation)) {
+                        valve.open();
+                    } else if ("close".equals(operation)) {
+                        valve.close();
+                    }
+                }
             });
 
             client.receive(this.config.getProperty(DeviceConfig.CONTROL_ADDRESS));
 
             int updateInterval = Integer.valueOf(this.config.getProperty(DeviceConfig.UPDATE_INTERVAL));
             String temperatureAddress = this.config.getProperty(DeviceConfig.TEMPERATURE_ADDRESS);
+
             this.vertx.setPeriodic(updateInterval, t -> {
 
                 int temperature = this.dht22.getTemperature();
@@ -135,7 +150,6 @@ public class HeatingDevice implements Device {
                 client.send(temperatureAddress, json.toString(), v -> {
                     log.info("... sent");
                 });
-
             });
 
         } else {

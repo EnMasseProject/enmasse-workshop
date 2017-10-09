@@ -12,7 +12,7 @@ In this workshop we will be deploying 4 different components:
 * A Thermostat application performing command & control of devices
 * An IoT device simulator
 
-The first 2 will be deployed directly to OpenShift. The thermostat controller will be built and
+The first 2 will be deployed directly to OpenShift. The thermostat will be built and
 deployed to OpenShift from your laptop, and the IoT simulator will be running locally on your laptop.
 
 ![overview](images/overview.png)
@@ -62,28 +62,29 @@ Run the deployment script with `-h` option
 In this workshop, we will deploy using the standard (keycloak) authentication service, use a unique id as your namespace, and tell it to deploy to the OpenShift cluster
 
 ```
-./enmasse-0.13.0/enmasse-deploy.sh -a standard -n enmasse-<YOURID> -m https://$HOST:8443
+./enmasse-0.13.0/enmasse-deploy.sh -a standard -n workshop-<YOURID> -m https://$HOST:8443
 ```
 
 #### Startup
 
-You can observe the state of the EnMasse cluster using `oc get pods -n enmasse-<YOURID>`. When all the pods are in the `Running` state, the cluster is ready. While waiting, go to the OpenShift console.
+You can observe the state of the EnMasse cluster using `oc get pods -n workshop-<YOURID>`. When all the pods are in the `Running` state, the cluster is ready. While waiting, go to the OpenShift console.
 
 In the OpenShift console, you can see the different deployments for the various EnMasse components. You can go into each pod and look at the logs. If we go to the address controller log, you can see that its creating a 'default' address space.
 
 #### Authenticating
 
-Our cluster does not yet have any users created, so it cannot create addresses. We therefore have to create a user using the keycloak interface. Go to the OpenShift console, application -> routes, and click on the hostname for the 'keycloak' route. This should bring you to the keycloak admin console. The admin user is protected by an automatically generated password, so we need to extract that as well before being able to create users.
+Our cluster does not yet have any users created, so it cannot create addresses. We therefore have to create a user using the keycloak interface. By default, the keycloak service is not exposed, so we need to expose that service.
 
 ```
-oc extract secret/keycloak-credentials
+oc expose service standard-authservice --name=keycloak -n workshop-<YOURID> --port 8080
+```
+
+Go to the OpenShift console, application -> routes, and click on the hostname for the 'keycloak' route. This should bring you to the keycloak admin console. The admin user is protected by an automatically generated password, so we need to extract that as well before being able to create users.
+
+```
+oc extract secret/keycloak-credentials -n workshop-<YOURID>
+cat admin.username
 cat admin.password
-```
-
-The hostname for the keycloak administration interface can be found by running
-
-```
-oc get route keycloak -o jsonpath='{.spec.host}'
 ```
 
 In the keycloak UI, create a new user, and a set of credentials for that user. Make sure the user is
@@ -135,7 +136,7 @@ the Oshinko application with a web UI for deploying a Spark cluster.
 First, you have to get the Oshinko resources into your project.
 
 ```
-oc create -f https://radanalytics.io/resources.yaml -n enmasse
+oc create -f https://radanalytics.io/resources.yaml -n workshop-<YOURID>
 ```
 
 Then start the Oshinko Web UI application.
@@ -154,7 +155,26 @@ TODO
 
 The thermostat application uses the [fabric8-maven-plugin](https://github.com/fabric8io/fabric8-maven-plugin) to create a docker image, an OpenShift deployment config, and deploy the thermostat into OpenShift. 
 
-TODO: Build instructions
+First, modify the thermostat configuration in
+`iot/thermostat/src/main/resources/config.properties`. Make sure that `service.hostname` matches
+that of the messaging service, and that `service.username` and `service.password` matches the
+credentials you created in keycloak. You can also change the addresses used in this workshop, but it
+is not needed for the thermostat to run.
+
+To build the application and a docker image:
+
+```
+cd iot/thermostat
+mvn -Dfabric8.mode=openshift package fabric8:build
+```
+
+To deploy the image to the OpenShift cluster
+
+```
+mvn fabric8:resource fabric8:deploy
+```
+
+The thermostat will be deployed to the OpenShift cluster. The pod will be named `thermostat-$number` where `$number` is incremented each time you run the deploy command.
 
 
 ### Running the IoT simulator
