@@ -116,16 +116,18 @@ public class HeatingDevice implements Device {
             Client client = done.result();
 
             client.receivedHandler(messageDelivery -> {
-                log.info("Received message on {} with payload {}",
-                        messageDelivery.address(), messageDelivery.message());
 
-                JsonObject object = new JsonObject(Buffer.buffer(messageDelivery.message()));
-                String deviceId = object.getString("device-id");
+                JsonObject json = new JsonObject(Buffer.buffer(messageDelivery.message()));
+
+                log.info("Received message on {} with payload {}",
+                        messageDelivery.address(), json);
+
+                String deviceId = json.getString("device-id");
                 if (!deviceId.equals(this.config.getProperty(DeviceConfig.DEVICE_ID))) {
-                    log.error("Received control message for some other device with id " + deviceId);
+                    log.error("Received control message for some other device with id {}", deviceId);
                 } else {
-                    String operation = object.getString("operation");
-                    if ("open".equals(operation)) {
+                    String operation = json.getString("operation");
+                    if ("open".equals(json)) {
                         valve.open();
                     } else if ("close".equals(operation)) {
                         valve.close();
@@ -133,7 +135,9 @@ public class HeatingDevice implements Device {
                 }
             });
 
-            client.receive(this.config.getProperty(DeviceConfig.CONTROL_ADDRESS));
+            String controlAddress = this.config.getProperty(DeviceConfig.CONTROL_ADDRESS);
+            log.info("Registering to receive on {}", controlAddress);
+            client.receive(controlAddress);
 
             int updateInterval = Integer.valueOf(this.config.getProperty(DeviceConfig.UPDATE_INTERVAL));
             String temperatureAddress = this.config.getProperty(DeviceConfig.TEMPERATURE_ADDRESS);
