@@ -22,6 +22,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.net.PemTrustOptions;
 import io.vertx.mqtt.MqttClientOptions;
 
 import java.util.Properties;
@@ -33,8 +34,8 @@ public class MqttClient extends Client {
 
     private io.vertx.mqtt.MqttClient client;
 
-    public MqttClient(String hostname, int port, Vertx vertx) {
-        super(hostname, port, vertx);
+    public MqttClient(String hostname, int port, String serverCert, Vertx vertx) {
+        super(hostname, port, serverCert, vertx);
     }
 
     @Override
@@ -54,6 +55,12 @@ public class MqttClient extends Client {
                 new MqttClientOptions()
                 .setUsername(username)
                 .setPassword(password);
+
+        if (this.serverCert != null && !this.serverCert.isEmpty()) {
+            options.setSsl(true)
+                    .setHostnameVerificationAlgorithm("")
+                    .setPemTrustOptions(new PemTrustOptions().addCertPath(this.serverCert));
+        }
 
         this.client = io.vertx.mqtt.MqttClient.create(vertx, options);
         this.client.connect(this.port, this.hostname, done -> {

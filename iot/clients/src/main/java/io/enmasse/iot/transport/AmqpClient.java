@@ -20,7 +20,9 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.net.PemTrustOptions;
 import io.vertx.proton.ProtonClient;
+import io.vertx.proton.ProtonClientOptions;
 import io.vertx.proton.ProtonConnection;
 import io.vertx.proton.ProtonDelivery;
 import io.vertx.proton.ProtonHelper;
@@ -44,8 +46,8 @@ public class AmqpClient extends Client {
     private Map<String, ProtonSender> senders;
     private Map<String, ProtonReceiver> receivers;
 
-    public AmqpClient(String hostname, int port, Vertx vertx) {
-        super(hostname, port, vertx);
+    public AmqpClient(String hostname, int port, String serverCert, Vertx vertx) {
+        super(hostname, port, serverCert, vertx);
     }
 
     @Override
@@ -63,7 +65,15 @@ public class AmqpClient extends Client {
 
         this.client = ProtonClient.create(vertx);
 
-        this.client.connect(this.hostname, this.port, username, password, done -> {
+        ProtonClientOptions options = new ProtonClientOptions();
+        if (this.serverCert != null && !this.serverCert.isEmpty()) {
+            options
+                    .setSsl(true)
+                    .setHostnameVerificationAlgorithm("")
+                    .setPemTrustOptions(new PemTrustOptions().addCertPath(this.serverCert));
+        }
+
+        this.client.connect(options, this.hostname, this.port, username, password, done -> {
 
             if (done.succeeded()) {
 

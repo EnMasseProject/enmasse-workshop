@@ -33,6 +33,7 @@ public abstract class Client {
 
     protected final String hostname;
     protected final int port;
+    protected final String serverCert;
     protected final Vertx vertx;
     protected Handler<MessageDelivery> receivedHandler;
 
@@ -41,11 +42,13 @@ public abstract class Client {
      *
      * @param hostname  hostname to connect to
      * @param port  host port to connect to
+     * @param serverCert    path to the Server certificate for authentication
      * @param vertx Vert.x instance used for the client
      */
-    public Client(String hostname, int port, Vertx vertx) {
+    public Client(String hostname, int port, String serverCert, Vertx vertx) {
         this.hostname = hostname;
         this.port = port;
+        this.serverCert = serverCert;
         this.vertx = vertx;
     }
 

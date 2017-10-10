@@ -76,16 +76,17 @@ public class HeatingDevice implements Device {
         // getting hostname and port for client connection
         String hostname = this.config.getProperty(DeviceConfig.HOSTNAME);
         int port = Integer.valueOf(this.config.getProperty(DeviceConfig.PORT));
+        String serverCert = this.config.getProperty(DeviceConfig.TRANSPORT_SSL_SERVER_CERT);
 
         try {
             // getting and creating the transport class to use
             Class transportClass = Class.forName(this.config.getProperty(DeviceConfig.TRANSPORT_CLASS));
-            Constructor constructor = transportClass.getConstructor(String.class, int.class, Vertx.class);
-            this.client = (Client) constructor.newInstance(hostname, port, this.vertx);
+            Constructor constructor = transportClass.getConstructor(String.class, int.class, String.class, Vertx.class);
+            this.client = (Client) constructor.newInstance(hostname, port, serverCert, this.vertx);
             log.info("Using {} as transport", transportClass);
         } catch (Exception e) {
             log.error("Transport class instantiation error ...", e);
-            this.client = new AmqpClient(hostname, port, this.vertx);
+            this.client = new AmqpClient(hostname, port, serverCert, this.vertx);
             log.info("Using default {} as transport", AmqpClient.class);
         }
     }
