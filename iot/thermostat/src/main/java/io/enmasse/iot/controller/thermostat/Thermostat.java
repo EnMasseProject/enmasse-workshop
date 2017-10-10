@@ -123,7 +123,6 @@ public class Thermostat extends AbstractVerticle {
             } else {
                 log.info("Error sending control message to {}", deviceId);
             }
-            sender.close();
         });
         sender.closeHandler(link -> {
             sender.close();
