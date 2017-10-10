@@ -1,7 +1,6 @@
-# enmasse-workshop
-Workshop stuff about using EnMasse. In this workshop you will deploy EnMasse, Spark and an IoT
-sensor simulator. You gain insight into deploying and operating an EnMasse cluster, and connect it
-to a Spark cluster for analyzing the sensor data.
+# EnMasse Workshop
+In this workshop you will deploy [EnMasse](http://enmasse.io/), [Apache Spark](https://spark.apache.org/) and an IoT sensors simulator.
+You gain insight into deploying and operating an EnMasse cluster, and connect it to a Spark cluster for analyzing the sensors data.
 
 ## Setting up
 
@@ -10,10 +9,10 @@ In this workshop we will be deploying 4 different components:
 * EnMasse messaging service
 * A Spark cluster for doing analytics
 * A Thermostat application performing command & control of devices
-* An IoT device simulator
+* One or more IoT device simulators
 
 The first 2 will be deployed directly to OpenShift. The thermostat will be built and
-deployed to OpenShift from your laptop, and the IoT simulator will be running locally on your laptop.
+deployed to OpenShift from your laptop, and the device IoT simulator will be running locally on your laptop.
 
 ![deployment](images/demo_deployment.png)
 
@@ -21,7 +20,7 @@ deployed to OpenShift from your laptop, and the IoT simulator will be running lo
 
 #### Downloading and installing minishift
 
-If you don't have an OpenShift cluster available, you can use [minishift](https://github.com/minishift/minishift/) to run OpenShift locally on your laptop. Minishift supports all major OS platforms.  Go to https://github.com/minishift/minishift/releases/tag/v1.6.0 and select the download for your OS.
+If you don't have an OpenShift cluster available, you can use [minishift](https://github.com/minishift/minishift/) to run OpenShift locally on your laptop. Minishift supports all major OS platforms.  Go to https://github.com/minishift/minishift/releases and select the latest version and the download for your OS.
 
 #### Starting minishift
 
@@ -36,7 +35,7 @@ Once this command completes, the OpenShift cluster should be ready to use.
 
 ### Exploring the console
 
-Take a few minutes to familiarize yourself with the openshift console. If you use minishift, you can run `minishift dashboard` which will open a window in your web browser. With minishift, you can login with username <b>developer</b> and password <b>developer</b>.
+Take a few minutes to familiarize yourself with the OpenShift console. If you use minishift, you can run `minishift dashboard` which will open a window in your web browser. With minishift, you can login with username <b>developer</b> and password <b>developer</b>.
 
 ## EnMasse messaging service
 
@@ -67,7 +66,7 @@ Run the deployment script with `-h` option
 ./enmasse-0.13.0/deploy-openshift.sh -h
 ```
 
-In this workshop, we will deploy using the standard (keycloak) authentication service, use a unique id as your namespace, and tell it to deploy to the OpenShift cluster.
+In this workshop, we will deploy using the standard (Keycloak) authentication service, use a unique id as your namespace, and tell it to deploy to the OpenShift cluster.
 Set $NAMSPACE to the OpenShift project you will be using through this workshop:
 
 ```
@@ -77,7 +76,6 @@ export NAMESPACE=workspace-$USER_ID
 ./enmasse-0.13.0/deploy-openshift.sh -a standard -n $NAMESPACE -m https://$HOST:8443 -u $USER_ID
 ```
 
-
 #### Startup
 
 You can observe the state of the EnMasse cluster using `oc get pods -n $NAMESPACE`. When all the pods are in the `Running` state, the cluster is ready. While waiting, go to the OpenShift console.
@@ -86,7 +84,7 @@ In the OpenShift console, you can see the different deployments for the various 
 
 #### Authenticating
 
-Our cluster does not yet have any users created, so it cannot create addresses. We therefore have to create a user using the keycloak interface. By default, the keycloak service is not exposed, so we need to expose that service.
+Our cluster does not yet have any users created, so it cannot create addresses. We therefore have to create a user using the Keycloak interface. By default, the Keycloak service is not exposed, so we need to expose that service.
 
 ```
 oc expose service standard-authservice --name=keycloak -n $NAMESPACE --port 8080
@@ -100,7 +98,7 @@ cat admin.username
 cat admin.password
 ```
 
-In the keycloak UI, create a new user, and a set of credentials for that user. Make sure the user is
+In the Keycloak UI, create a new user, and a set of credentials for that user. Make sure the user is
 enabled, and that the credentials are not marked as temporary.
 
 #### Creating messaging addresses
@@ -193,7 +191,7 @@ The thermostat application uses the [fabric8-maven-plugin](https://github.com/fa
 First, modify the thermostat configuration in
 `iot/thermostat/src/main/resources/config.properties`. Make sure that `service.hostname` matches
 that of the messaging service, and that `service.username` and `service.password` matches the
-credentials you created in keycloak. You can also change the addresses used in this workshop, but it
+credentials you created in Keycloak. You can also change the addresses used in this workshop, but it
 is not needed for the thermostat to run.
 
 To build the application and a docker image:
