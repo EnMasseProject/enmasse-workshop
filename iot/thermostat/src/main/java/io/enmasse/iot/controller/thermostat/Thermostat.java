@@ -89,6 +89,8 @@ public class Thermostat extends AbstractVerticle {
         String deviceId = json.getString("device-id");
         int temperature = json.getInteger("temperature");
 
+        log.info("Received notification with payload {}", json);
+
         adjustTemperature(deviceId, temperature);
     }
 
@@ -101,7 +103,8 @@ public class Thermostat extends AbstractVerticle {
     }
 
     private void sendCommand(String deviceId, String command) {
-        ProtonSender sender = connection.createSender(controlPrefix + "/" + deviceId);
+        String address = controlPrefix + "/" + deviceId;
+        ProtonSender sender = connection.createSender(address);
 
         JsonObject json = new JsonObject();
         json.put("device-id", deviceId);
@@ -112,7 +115,7 @@ public class Thermostat extends AbstractVerticle {
 
         sender.openHandler(link -> {
             if (link.succeeded()) {
-                log.info("Sending control {} ...", json);
+                log.info("Sending control to {}: {}", address, json);
                 sender.send(controlMessage, delivery -> {
                     log.info("... sent {}", new String(delivery.getTag()));
                     sender.close();
