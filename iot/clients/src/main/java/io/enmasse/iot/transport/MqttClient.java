@@ -98,10 +98,12 @@ public class MqttClient extends Client {
     public void send(String address, byte[] data, Handler<String> sendCompletionHandler) {
 
         this.vertx.runOnContext(c -> {
-            this.client.publish(address, Buffer.buffer(data), MqttQoS.AT_MOST_ONCE, false, false, messageId -> {
+            this.client.publish(address, Buffer.buffer(data), MqttQoS.AT_MOST_ONCE, false, false, done -> {
 
-                if (sendCompletionHandler != null) {
-                    sendCompletionHandler.handle(messageId.toString());
+                if (done.succeeded()) {
+                    if (sendCompletionHandler != null) {
+                        sendCompletionHandler.handle(done.result().toString());
+                    }
                 }
             });
         });
