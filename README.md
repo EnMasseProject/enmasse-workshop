@@ -72,8 +72,9 @@ Set $NAMSPACE to the OpenShift project you will be using through this workshop:
 ```
 export USER_ID=<something>
 export NAMESPACE=workspace-$USER_ID
+export OPENSHIFT_MASTER=<something>
 
-./enmasse-0.13.0/deploy-openshift.sh -a standard -n $NAMESPACE -m https://$HOST:8443 -u $USER_ID
+./enmasse-0.13.0/deploy-openshift.sh -a standard -n $NAMESPACE -m $OPENSHIFT_MASTER -u $USER_ID
 ```
 
 #### Startup
@@ -131,13 +132,7 @@ Create an addresses for your IoT sensors to report metrics on:
 
    * temperature - type topic - used by devices to report temperature
    * max         - type anycast - used by Spark driver to report the max temperature
-
-Then a few addresses for controlling devices
-
-   * control/device1 - type queue - used to send control messages to device1
-   * control/device2 - type queue - used to send control messages to device2
-   * control/device3 - type queue - used to send control messages to device3
-
+   * control     - type topic - used to send control messages to devices. Per-device contorl messages will be sent to control/$device-id 
 
 ### Installing Apache Spark
 
@@ -165,24 +160,21 @@ Using this UI, you are able to deploy an Apache Spark cluster inside OpenShift s
 The `spark-driver` directory provides the Spark Streaming driver application and a Docker image for running the related Spark driver inside the cluster. This application can be packaged running the following command from such directory.
 
 ```
-mvn package -Pbuild-docker-image
+mvn clean install package -Pbuild-docker-image
 ```
 
 This command will package the application and build a Docker image ready to be deployed on OpenShift.
-In order to deploy the Spark driver, an OpenShift template is available which can be made available with following command.
+In order to deploy the Spark driver, an OpenShift template is available which can be instantiated with the following command:
 
 ```
-oc create -f <path-to-repo>/spark-driver/target/fabric8/spark-driver-template.yaml
+oc process -f target/fabric8/spark-driver-template.yaml SPARK_MASTER_HOST=myspark SPARK_DRIVER_USERNAME=test SPARK_DRIVER_PASSWORD=test | oc create -f -
 ```
-
-Using such template from the catalog, it's possible to deploy the Spark driver specifying following template parameters :
+It's possible to configure the Spark driver changing these parameters:
 
 * _SPARK_MASTER_HOST_ : hostname of the Spark master node
 * _SPARK_MASTER_PORT_ : the port of the Spark master node (default value is 7077)
 * _SPARK_DRIVER_USERNAME_ : username provided by Keycloak for driver authentication with EnMasse
 * _SPARK_DRIVER_PASSWORD_ : password provided by Keycloak for driver authentication with EnMasse
-
-![overview](images/spark_driver_template.png)
 
 ### Deploying the "Thermostat" application
 
