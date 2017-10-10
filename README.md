@@ -15,10 +15,6 @@ In this workshop we will be deploying 4 different components:
 The first 2 will be deployed directly to OpenShift. The thermostat will be built and
 deployed to OpenShift from your laptop, and the IoT simulator will be running locally on your laptop.
 
-![overview](images/overview.png)
-
-A more detailed deployment.
-
 ![deployment](images/demo_deployment.png)
 
 ### (Optional) Installing OpenShift
@@ -42,6 +38,14 @@ Once this command completes, the OpenShift cluster should be ready to use.
 
 Take a few minutes to familiarize yourself with the openshift console. If you use minishift, you can run `minishift dashboard` which will open a window in your web browser. With minishift, you can login with username <b>developer</b> and password <b>developer</b>.
 
+## EnMasse messaging service
+
+EnMasse is an open source messaging platform, with focus on scalability and performance. EnMasse can
+run on your own infrastructure or in the cloud, and simplifies the deployment of messaging
+infrastructure.
+
+For this workshop, all messages will flow through EnMasse in some way.
+
 ### Installing EnMasse
 
 Go to [EnMasse downloads](https://github.com/EnMasseProject/enmasse/releases/latest) and download
@@ -60,15 +64,17 @@ it works.
 Run the deployment script with `-h` option
 
 ```
-./enmasse-0.13.0/enmasse-deploy.sh -h
+./enmasse-0.13.0/deploy-openshift.sh -h
 ```
 
 In this workshop, we will deploy using the standard (keycloak) authentication service, use a unique id as your namespace, and tell it to deploy to the OpenShift cluster.
 Set $NAMSPACE to the OpenShift project you will be using through this workshop:
 
 ```
-export NAMESPACE=
-./enmasse-0.13.0/enmasse-deploy.sh -a standard -n $NAMESPACE -m https://$HOST:8443
+export USER_ID=<something>
+export NAMESPACE=workspace-$USER_ID
+
+./enmasse-0.13.0/deploy-openshift.sh -a standard -n $NAMESPACE -m https://$HOST:8443 -u $USER_ID
 ```
 
 
