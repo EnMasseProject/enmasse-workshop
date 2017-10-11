@@ -118,10 +118,10 @@ messages from that address.
 
 In the 'standard' address space, we have 4 types of addresses.
 
-   * multicast - 'direct' one-to-many using dispatch router
-   * anycast   - 'direct' peer-2-peer using dispatch router
-   * queue     - queue on broker
-   * topic     - pub/sub on broker
+   * **multicast** : 'direct' one-to-many using dispatch router
+   * **anycast** : 'direct' peer-2-peer using dispatch router
+   * **queue** : queue on broker
+   * **topic** : pub/sub on broker
 
 
 ##### Creating addresses for this workshop
@@ -130,9 +130,9 @@ Go to the console, and locate the 'console' route. Click on the link to get to t
 
 Create an addresses for your IoT sensors to report metrics on:
 
-   * temperature - type topic - used by devices to report temperature
-   * max         - type anycast - used by Spark driver to report the max temperature
-   * control     - type topic - used to send control messages to devices. Per-device contorl messages will be sent to control/$device-id 
+   * _temperature_ : type topic - used by devices to report temperature
+   * _max_ : type anycast - used by Spark driver to report the max temperature
+   * _control_ : type topic - used to send control messages to devices. Per-device control messages will be sent to control/$device-id
 
 ### Installing Apache Spark
 
@@ -208,14 +208,14 @@ The devices supports two protocols, AMQP and MQTT, which are configurable.
 The Heating device application :
 
 * get temperature values from a simulated DHT22 temperature sensor sending them to the _temperature_ address periodically
-* receive commands for opening/closing a simulated valve on the _control/[device-id]_ address
+* receive commands for opening/closing a simulated valve on the _control/$device-id_ address
 
 The console application can be configured using a `device.properties` file which provides following parameters :
 
 * _service.hostname_ : hostname of the EnMasse messaging/mqtt service to connect (for AMQP or MQTT)
 * _service.port_ : port of the EnMasse messaging service to connect
 * _service.temperature.address_ : address on which temperature values will be sent (should not be changed from the _temperature_ value)
-* _service.control.prefix_ : prefix for defining the control address for receiving command (should not be changed from the _contro_ value)
+* _service.control.prefix_ : prefix for defining the control address for receiving command (should not be changed from the _control_ value)
 * _device.id_ : device identifier
 * _device.username_ : device username (from Keyclock) for EnMasse authentication
 * _device.password_ : device password (from Keyclock) for EnMasse authentication
