@@ -111,6 +111,7 @@ public class Thermostat extends AbstractVerticle {
         json.put("operation", command);
         Message controlMessage = Message.Factory.create();
 
+        controlMessage.setAddress(address);
         controlMessage.setBody(new Data(new Binary(json.toBuffer().getBytes())));
 
         sender.openHandler(link -> {
