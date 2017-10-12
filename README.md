@@ -251,11 +251,15 @@ oc extract secret/external-certs-mqtt --to=mqtt-certs -n $NAMESPACE
 
 Both commands extract the certificate `server-cert.pem` file. The file path needs to be set as value for the device configuration property _device.transport.ssl.servercert_.
 
-#### Using Maven/IDE
+#### Using Maven
 
-TODO: Instructions
+In order to run the `HeatingDevice` application you can use the Maven `exec` plugin with the following command from the `clients` directory.
 
-#### From pre-built jars
+```
+mvn exec:java -Dexec.mainClass=io.enmasse.iot.device.impl.HeatingDevice -Dexec.args=<path-to-device-properties-file>
+```
+
+#### Using pre-built JARs
 
 The provided `heating-device.jar` can be used for starting a simulated heating device with the following command.
 
