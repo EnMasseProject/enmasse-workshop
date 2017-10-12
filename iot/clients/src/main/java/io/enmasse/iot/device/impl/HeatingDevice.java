@@ -26,6 +26,7 @@ import io.enmasse.iot.transport.MqttClient;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,21 +119,25 @@ public class HeatingDevice implements Device {
 
             client.receivedHandler(messageDelivery -> {
 
-                JsonObject json = new JsonObject(Buffer.buffer(messageDelivery.message()));
+                try {
+                    JsonObject json = new JsonObject(Buffer.buffer(messageDelivery.message()));
 
-                log.info("Received message on {} with payload {}",
-                        messageDelivery.address(), json);
+                    log.info("Received message on {} with payload {}",
+                            messageDelivery.address(), json);
 
-                String deviceId = json.getString("device-id");
-                if (!deviceId.equals(this.config.getProperty(DeviceConfig.DEVICE_ID))) {
-                    log.error("Received control message for some other device with id {}", deviceId);
-                } else {
-                    String operation = json.getString("operation");
-                    if ("open".equals(json)) {
-                        valve.open();
-                    } else if ("close".equals(operation)) {
-                        valve.close();
+                    String deviceId = json.getString("device-id");
+                    if (!deviceId.equals(this.config.getProperty(DeviceConfig.DEVICE_ID))) {
+                        log.error("Received control message for some other device with id {}", deviceId);
+                    } else {
+                        String operation = json.getString("operation");
+                        if ("open".equals(json)) {
+                            valve.open();
+                        } else if ("close".equals(operation)) {
+                            valve.close();
+                        }
                     }
+                } catch (DecodeException e) {
+                    log.error("Error decoding message, discarded !", e);
                 }
             });
 
