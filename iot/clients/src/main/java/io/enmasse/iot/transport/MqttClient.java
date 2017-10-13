@@ -75,6 +75,10 @@ public class MqttClient extends Client {
                     this.receivedHandler.handle(messageDelivery);
                 });
 
+                this.client.subscribeCompletionHandler(suback -> {
+                    log.info("Subscription [{}], granted QoS levels {}", suback.messageId(), suback.grantedQoSLevels());
+                });
+
                 connectHandler.handle(Future.succeededFuture(this));
 
             } else {
@@ -113,7 +117,14 @@ public class MqttClient extends Client {
     public void receive(String address) {
 
         this.vertx.runOnContext(c -> {
-            this.client.subscribe(address, MqttQoS.AT_MOST_ONCE.value());
+            this.client.subscribe(address, MqttQoS.AT_MOST_ONCE.value(), done -> {
+
+                if (done.succeeded()) {
+                    log.info("Subscription request [{}] for {}", done.result(), address);
+                } else {
+                    log.error("Error subscribing to {}", address, done.cause());
+                }
+            });
         });
     }
 }

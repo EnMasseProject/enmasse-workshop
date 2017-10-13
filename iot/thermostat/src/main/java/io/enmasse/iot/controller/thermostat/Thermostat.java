@@ -63,6 +63,7 @@ public class Thermostat extends AbstractVerticle {
             if (connection.succeeded()) {
                 log.info("Connected to {}:{}", messagingHost, messagingPort);
                 ProtonConnection connectionHandle = connection.result();
+                connectionHandle.open();
 
                 ProtonReceiver receiver = connectionHandle.createReceiver(notificationAddress);
                 receiver.handler(this::handleNotification);
@@ -75,7 +76,6 @@ public class Thermostat extends AbstractVerticle {
                     }
                 });
                 receiver.open();
-                connectionHandle.open();
                 this.connection = connectionHandle;
             } else {
                 log.info("Error connecting to {}:{}", messagingHost, messagingPort);
@@ -96,19 +96,20 @@ public class Thermostat extends AbstractVerticle {
 
     private void adjustTemperature(String deviceId, int temperature) {
         if (temperature < minTemp) {
-            sendCommand(deviceId, "open");
+            sendCommand(deviceId, "open", temperature);
         } else if (temperature > maxTemp) {
-            sendCommand(deviceId, "close");
+            sendCommand(deviceId, "close", temperature);
         }
     }
 
-    private void sendCommand(String deviceId, String command) {
+    private void sendCommand(String deviceId, String command, int temperature) {
         String address = controlPrefix + "/" + deviceId;
         ProtonSender sender = connection.createSender(address);
 
         JsonObject json = new JsonObject();
         json.put("device-id", deviceId);
         json.put("operation", command);
+        json.put("max", temperature);
         Message controlMessage = Message.Factory.create();
 
         controlMessage.setAddress(address);

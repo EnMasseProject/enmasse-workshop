@@ -29,7 +29,10 @@ import io.vertx.proton.ProtonHelper;
 import io.vertx.proton.ProtonReceiver;
 import io.vertx.proton.ProtonSender;
 import org.apache.qpid.proton.amqp.Binary;
+import org.apache.qpid.proton.amqp.messaging.Accepted;
+import org.apache.qpid.proton.amqp.messaging.AmqpValue;
 import org.apache.qpid.proton.amqp.messaging.Data;
+import org.apache.qpid.proton.amqp.messaging.Section;
 import org.apache.qpid.proton.message.Message;
 
 import java.util.HashMap;
@@ -129,24 +132,40 @@ public class AmqpClient extends Client {
             if (sender == null) {
 
                 sender = this.connection.createSender(address);
+                sender.openHandler(done ->{
+
+                    if (done.succeeded()) {
+                        this.sendInternal(done.result(), address, data, sendCompletionHandler);
+                    } else {
+                        log.error("Error opening the sender link on {}", address);
+                    }
+
+                });
                 sender.open();
                 this.senders.put(address, sender);
-            }
 
-            Message msg = ProtonHelper.message();
-            msg.setBody(new Data(new Binary(data)));
-            msg.setAddress(address);
+            } else {
 
-            if (sender.isOpen()) {
-
-                sender.send(msg, delivery -> {
-
-                    if (sendCompletionHandler != null) {
-                        sendCompletionHandler.handle(new String(delivery.getTag()));
-                    }
-                });
+                this.sendInternal(sender, address, data, sendCompletionHandler);
             }
         });
+    }
+
+    private void sendInternal(ProtonSender sender, String address, byte[] data, Handler<String> sendCompletionHandler) {
+
+        Message msg = ProtonHelper.message();
+        msg.setBody(new Data(new Binary(data)));
+        msg.setAddress(address);
+
+        if (sender.isOpen()) {
+
+            sender.send(msg, delivery -> {
+
+                if (sendCompletionHandler != null) {
+                    sendCompletionHandler.handle(new String(delivery.getTag()));
+                }
+            });
+        }
     }
 
     @Override
@@ -166,9 +185,21 @@ public class AmqpClient extends Client {
 
     private void receiverHandler(ProtonReceiver receiver, ProtonDelivery delivery, Message message) {
 
+        Section section = message.getBody();
+
+        byte[] data = null;
+        if (section instanceof AmqpValue) {
+            data = ((String) ((AmqpValue)section).getValue()).getBytes();
+        } else if (section instanceof Data) {
+            data = ((Data)message.getBody()).getValue().getArray();
+        } else {
+            log.error("Discarded message : body type not supported");
+        }
+
         MessageDelivery messageDelivery =
-                new MessageDelivery(receiver.getSource().getAddress(),
-                        ((Data)message.getBody()).getValue().getArray());
+                new MessageDelivery(receiver.getSource().getAddress(), data);
+
+        delivery.disposition(Accepted.getInstance(), true);
 
         this.receivedHandler.handle(messageDelivery);
     }
