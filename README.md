@@ -103,6 +103,8 @@ For this workshop we could use following users for example :
 * _sparkdriver_ : as Spark driver application user
 * _thermostat_ : as thermostat application user
 
+It's clear that this workshop involves a "real" user who is in charge to create and configure the addresses and some other users which are relaled to applications running in the cluster and devices running in the field.
+
 #### Creating messaging addresses
 
 In EnMasse, you have the concepts of address spaces and addresses.
