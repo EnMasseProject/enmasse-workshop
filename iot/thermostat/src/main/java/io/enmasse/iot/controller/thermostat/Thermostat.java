@@ -63,6 +63,7 @@ public class Thermostat extends AbstractVerticle {
             if (connection.succeeded()) {
                 log.info("Connected to {}:{}", messagingHost, messagingPort);
                 ProtonConnection connectionHandle = connection.result();
+                connectionHandle.open();
 
                 ProtonReceiver receiver = connectionHandle.createReceiver(notificationAddress);
                 receiver.handler(this::handleNotification);
@@ -75,7 +76,6 @@ public class Thermostat extends AbstractVerticle {
                     }
                 });
                 receiver.open();
-                connectionHandle.open();
                 this.connection = connectionHandle;
             } else {
                 log.info("Error connecting to {}:{}", messagingHost, messagingPort);
