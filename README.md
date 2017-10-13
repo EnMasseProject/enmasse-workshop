@@ -154,7 +154,7 @@ Then use the following command in order to deploy a Spark cluster made by one ma
 ```
 export SPARK_NAME=<something>
 
-./oshinko create $SPARK_NAME --masters=1 --workers=1
+./oshinko_linux_amd64/oshinko create $SPARK_NAME --masters=1 --workers=1
 ```
 
 ### Deploying the "Temperature Analyzer" Spark driver
@@ -169,6 +169,7 @@ This command will package the application and build a Docker image ready to be d
 In order to deploy the Spark driver, an OpenShift template is available which can be instantiated with the following command:
 
 ```
+cd iot/spark-driver
 oc process -f target/fabric8/spark-driver-template.yaml SPARK_MASTER_HOST=$SPARK_NAME SPARK_DRIVER_USERNAME=<user> SPARK_DRIVER_PASSWORD=<password> | oc create -f -
 ```
 It's possible to configure the Spark driver changing these parameters:
