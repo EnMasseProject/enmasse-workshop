@@ -48,10 +48,10 @@ For this workshop, all messages will flow through EnMasse in some way.
 ### Installing EnMasse
 
 Go to [EnMasse downloads](https://github.com/EnMasseProject/enmasse/releases/latest) and download
-the latest release (0.13.0 as of time of writing). Unpack the release:
+the latest release (0.13.2 as of time of writing). Unpack the release:
 
 ```
-tar xvf enmasse-0.13.0.tgz
+tar xvf enmasse-0.13.2.tgz
 ```
 
 The relase bundle contains OpenShift templates as well as a deployment script for deploying EnMasse.
@@ -63,7 +63,7 @@ it works.
 Run the deployment script with `-h` option
 
 ```
-./enmasse-0.13.0/deploy-openshift.sh -h
+./enmasse-0.13.2/deploy-openshift.sh -h
 ```
 
 In this workshop, we will deploy using the standard (Keycloak) authentication service, use a unique id as your namespace, and tell it to deploy to the OpenShift cluster.
@@ -74,7 +74,7 @@ export USER_ID=<something>
 export NAMESPACE=workspace-$USER_ID
 export OPENSHIFT_MASTER=<something>
 
-./enmasse-0.13.0/deploy-openshift.sh -a standard -n $NAMESPACE -m $OPENSHIFT_MASTER -u $USER_ID
+./enmasse-0.13.2/deploy-openshift.sh -a standard -n $NAMESPACE -m $OPENSHIFT_MASTER -u $USER_ID
 ```
 
 #### Startup
@@ -84,12 +84,6 @@ You can observe the state of the EnMasse cluster using `oc get pods -n $NAMESPAC
 In the OpenShift console, you can see the different deployments for the various EnMasse components. You can go into each pod and look at the logs. If we go to the address controller log, you can see that its creating a 'default' address space.
 
 #### Authenticating
-
-Our cluster does not yet have any users created, so it cannot create addresses. We therefore have to create a user using the Keycloak interface. By default, the Keycloak service is not exposed, so we need to expose that service.
-
-```
-oc expose service standard-authservice --name=keycloak -n $NAMESPACE --port 8080
-```
 
 Go to the OpenShift console, application -> routes, and click on the hostname for the 'keycloak' route. This should bring you to the keycloak admin console. The admin user is protected by an automatically generated password, so we need to extract that as well before being able to create users.
 
