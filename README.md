@@ -142,24 +142,23 @@ Create an addresses for your IoT sensors to report metrics on:
 
 ### Installing Apache Spark
 
-An official support for Apache Spark on OpenShift is provided by the [radanalytics.io](https://radanalytics.io/) project which provides
-the Oshinko application with a web UI for deploying a Spark cluster.
+An official support for Apache Spark on OpenShift is provided by the [radanalytics.io](https://radanalytics.io/) project by means of
+the Oshinko application with a Web UI for deploying a Spark cluster. Other than using such a Web UI, a CLI tool is available as well which is used for this workshop.
 
-First, you have to get the Oshinko resources into your project.
-
-```
-oc create -f https://radanalytics.io/resources.yaml -n $NAMESPACE
-```
-
-Then start the Oshinko Web UI application.
+Go to [Oshinko CLI downloads](https://github.com/radanalyticsio/oshinko-cli/releases) and download
+the latest release (0.3.1 as of time of writing). Unpack the release:
 
 ```
-oc new-app oshinko-webui
+tar xvf oshinko_v0.3.1_linux_amd64.tar.gz
 ```
 
-Using this UI, you are able to deploy an Apache Spark cluster inside OpenShift specifying the number of worker nodes you want (other than the default master).
+Then use the following command in order to deploy a Spark cluster made by one master node and one slave node.
 
-![overview](images/oshinko_ui_spark.png)
+```
+export SPARK_NAME=<something>
+
+./oshinko create $SPARK_NAME --masters=1 --workers=1
+```
 
 ### Deploying the "Temperature Analyzer" Spark driver
 
@@ -173,7 +172,7 @@ This command will package the application and build a Docker image ready to be d
 In order to deploy the Spark driver, an OpenShift template is available which can be instantiated with the following command:
 
 ```
-oc process -f target/fabric8/spark-driver-template.yaml SPARK_MASTER_HOST=myspark SPARK_DRIVER_USERNAME=test SPARK_DRIVER_PASSWORD=test | oc create -f -
+oc process -f target/fabric8/spark-driver-template.yaml SPARK_MASTER_HOST=$SPARK_NAMEk SPARK_DRIVER_USERNAME=<user> SPARK_DRIVER_PASSWORD=<password> | oc create -f -
 ```
 It's possible to configure the Spark driver changing these parameters:
 
