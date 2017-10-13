@@ -102,6 +102,12 @@ cat admin.password
 In the Keycloak UI, create a new user, and a set of credentials for that user. Make sure the user is
 enabled, and that the credentials are not marked as temporary.
 
+For this workshop we could use following users for example :
+
+* _deviceX_ : as deviceX (i.e. device1, device2, ...) user
+* _sparkdriver_ : as Spark driver application user
+* _thermostat_ : as thermostat application user
+
 #### Creating messaging addresses
 
 In EnMasse, you have the concepts of address spaces and addresses.
