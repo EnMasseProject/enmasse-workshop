@@ -254,13 +254,18 @@ oc extract secret/external-certs-mqtt --to=mqtt-certs -n $NAMESPACE
 
 Both commands extract the certificate `server-cert.pem` file. The file path needs to be set as value for the device configuration property _device.transport.ssl.servercert_.
 
+Other than that, be sure that _service.hostname_ property is set to the messaging (for AMQP devices) or mqtt (for MQTT devices) route. At same time the _service.port_ property needs to be set to 443.
+
 #### Using Maven
 
 In order to run the `HeatingDevice` application you can use the Maven `exec` plugin with the following command from the `clients` directory.
 
 ```
+cd iot/clients
 mvn exec:java -Dexec.mainClass=io.enmasse.iot.device.impl.HeatingDevice -Dexec.args=<path-to-device-properties-file>
 ```
+
+You can run such command more times in order to start more than one devices (using different Keycloak users and device-id for them). The provided `device-amqp.properties` and `device-mqtt.properties` files can be used as starting point for AMQP and MQTT device configuration.
 
 #### Using pre-built JARs
 
