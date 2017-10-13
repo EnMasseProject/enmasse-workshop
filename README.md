@@ -74,7 +74,7 @@ export USER_ID=<something>
 export NAMESPACE=workspace-$USER_ID
 export OPENSHIFT_MASTER=<something>
 
-./enmasse-0.13.2/deploy-openshift.sh -a standard -n $NAMESPACE -m $OPENSHIFT_MASTER -u $USER_ID
+./enmasse-0.13.2/deploy-openshift.sh -a standard -n $NAMESPACE -m $OPENSHIFT_MASTER -u user$USER_ID
 ```
 
 #### Startup
@@ -98,9 +98,12 @@ enabled, and that the credentials are not marked as temporary.
 
 For this workshop we could use following users for example :
 
+* _admin_ : as a "real" user who uses the console for creating addresses
 * _deviceX_ : as deviceX (i.e. device1, device2, ...) user
 * _sparkdriver_ : as Spark driver application user
 * _thermostat_ : as thermostat application user
+
+It's clear that this workshop involves a "real" user who is in charge to create and configure the addresses and some other users which are relaled to applications running in the cluster and devices running in the field.
 
 #### Creating messaging addresses
 
