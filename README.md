@@ -272,7 +272,8 @@ You can run such command more times in order to start more than one devices (usi
 The provided `heating-device.jar` can be used for starting a simulated heating device with the following command.
 
 ```
+cd iot/clients/jar
 java -jar heating-device.jar <path-to-device-properties-file>
 ```
 
-The console application needs only one argument which is the path to the `device.properties` file which contains the device configuration.
+The console application needs only one argument which is the path to the `device.properties` file with the device configuration.
