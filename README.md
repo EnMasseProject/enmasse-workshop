@@ -98,7 +98,7 @@ enabled, and that the credentials are not marked as temporary.
 
 For this workshop we could use following users for example :
 
-* _admin_ : as a "real" user who uses the console for creating addresses
+* _console_ : as a "real" user who uses the console for creating addresses
 * _deviceX_ : as deviceX (i.e. device1, device2, ...) user
 * _sparkdriver_ : as Spark driver application user
 * _thermostat_ : as thermostat application user
