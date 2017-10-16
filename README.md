@@ -2,6 +2,11 @@
 In this workshop you will deploy [EnMasse](http://enmasse.io/), [Apache Spark](https://spark.apache.org/) and an IoT sensors simulator.
 You gain insight into deploying and operating an EnMasse cluster, and connect it to a Spark cluster for analyzing the sensors data.
 
+## Prerequisits
+
+There are not so much prerequisits for running this workshop. The only one is to have [Maven](https://maven.apache.org/) already installed on the machine.
+If you don't have that, there is the [official installation guide](https://maven.apache.org/install.html) for doing that.
+
 ## Setting up
 
 In this workshop we will be deploying 4 different components:
