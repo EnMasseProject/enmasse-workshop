@@ -37,6 +37,22 @@ Once this command completes, the OpenShift cluster should be ready to use.
 
 Take a few minutes to familiarize yourself with the OpenShift console. If you use minishift, you can run `minishift dashboard` which will open a window in your web browser. With minishift, you can login with username <b>developer</b> and password <b>developer</b>.
 
+## Getting OC tools
+
+In order to execute commands against the OpenShift cluster, an `oc` client tool is needed.
+Go to [OpenShift Origin client tools releases](https://github.com/openshift/origin/releases/) and download
+the latest stable release (3.6.0 as of time of writing). Unpack the release:
+
+```
+tar xvf openshift-origin-client-tools-v3.6.0-c4dd4cf-linux-64bit.tar.gz
+```
+
+Then add the folder with the `oc` tools to the `PATH` :
+
+```
+PATH=$PATH:openshift-origin-client-tools-v3.6.0-c4dd4cf-linux-64bit
+```
+
 ## EnMasse messaging service
 
 EnMasse is an open source messaging platform, with focus on scalability and performance. EnMasse can
