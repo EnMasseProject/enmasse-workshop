@@ -181,7 +181,15 @@ export SPARK_NAME=<something>
 
 ### Deploying the "Temperature Analyzer" Spark driver
 
-The `spark-driver` directory provides the Spark Streaming driver application and a Docker image for running the related Spark driver inside the cluster. This application can be packaged running the following command from such directory.
+The `spark-driver` directory provides the Spark Streaming driver application and a Docker image for running the related Spark driver inside the cluster. Using `minishift`, we need that the following Docker images (built from the source) will be available in the local `minishift` Docker registry. For this reason, it's needed to run the following command first :
+
+```
+eval $(minishift docker-env)
+```
+
+In order to set as `DOCKER_HOST`, the `minishift` environment and all the Docker images will be built using that environment and will be available in `minishift` Docker registry.
+
+This application can be packaged running the following command from such directory.
 
 ```
 mvn clean install package -Pbuild-docker-image
