@@ -1,0 +1,12 @@
+- hosts: localhost
+  vars:
+    namespace: enmasse-workshop
+    multitenant: false
+    address_space_type: standard
+    address_space_plan: unlimited-standard
+    enable_rbac: true
+    keycloak_admin_password: admin
+    authentication_services:
+      - standard
+  roles:
+    - enmasse
