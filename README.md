@@ -2,10 +2,10 @@
 In this workshop you will deploy [EnMasse](http://enmasse.io/), [Apache Spark](https://spark.apache.org/) and an IoT sensors simulator.
 You gain insight into deploying and operating an EnMasse cluster, and connect it to a Spark cluster for analyzing the sensors data.
 
-## Prerequisits
+## Prerequisites
 
-There are not so much prerequisits for running this workshop. The only one is to have [Maven](https://maven.apache.org/) already installed on the machine.
-If you don't have that, there is the [official installation guide](https://maven.apache.org/install.html) for doing that.
+This tutorial uses [Ansible](www.ansible.org) to deploy components to OpenShift. To build the java code, you need [Maven](https://maven.apache.org/) already installed on the machine.
+If you don't have that, there is the [official installation guide](https://maven.apache.org/install.html) for doing that. Finally, the [OpenShift](https://www.openshift.org) client tools is used.
 
 ## Setting up
 
@@ -46,86 +46,102 @@ Take a few minutes to familiarize yourself with the OpenShift console. If you us
 
 In order to execute commands against the OpenShift cluster, an `oc` client tool is needed.
 Go to [OpenShift Origin client tools releases](https://github.com/openshift/origin/releases/) and download
-the latest stable release (3.6.0 as of time of writing). Unpack the release:
+the latest stable release (3.7.2 as of time of writing). Unpack the release:
 
 ```
-tar xvf openshift-origin-client-tools-v3.6.0-c4dd4cf-linux-64bit.tar.gz
+tar xvf openshift-origin-client-tools-v3.7.2-282e43f-linux-64bit.tar.gz
 ```
 
 Then add the folder with the `oc` tools to the `PATH` :
 
 ```
-PATH=$PATH:openshift-origin-client-tools-v3.6.0-c4dd4cf-linux-64bit
+PATH=$PATH:openshift-origin-client-tools-v3.7.2-282e43f-linux-64bit.tar.gz
 ```
 
 ## EnMasse messaging service
 
-EnMasse is an open source messaging platform, with focus on scalability and performance. EnMasse can
-run on your own infrastructure or in the cloud, and simplifies the deployment of messaging
-infrastructure.
+EnMasse is an open source messaging platform, with focus on scalability and performance. EnMasse can run on your own infrastructure or in the cloud, and simplifies the deployment of messaging infrastructure.
 
 For this workshop, all messages will flow through EnMasse in some way.
 
 ### Installing EnMasse
 
-Go to [EnMasse downloads](https://github.com/EnMasseProject/enmasse/releases/latest) and download
-the latest release (0.13.2 as of time of writing). Unpack the release:
+The EnMasse version used in this workshop can be found in the `enmasse` directory. We will use an [Ansible](www.ansible.org) playbook to install EnMasse and have a look at its options.
+
+#### Playbook
+
+This workshop will use the following [playbook](enmasse/ansible/playbooks/openshift/workshop.yml):
 
 ```
-tar xvf enmasse-0.13.2.tgz
+- hosts: localhost
+  vars:
+    namespace: enmasse-workshop
+    multitenant: false
+    address_space_type: standard
+    address_space_plan: unlimited-standard
+    enable_rbac: true
+    keycloak_admin_password: admin
+    authentication_services:
+      - standard
+  roles:
+    - enmasse
 ```
 
-The relase bundle contains OpenShift templates as well as a deployment script for deploying EnMasse.
-We will use this script in this tutorial and have a look at its options to get a better idea of how
-it works.
+This playbook instructs ansible to install EnMasse to the `enmasse-workshop` namespace in OpenShift.  We will use the non-multitenant mode for make it simple, and configure the `standard` address space to be used. We also enable OpenShift RBAC for the REST API and enable the standard authentication service ([Keycloak](www.keycloak.org)) for authentication. If your OpenShift cluster is on a public network, please change the `keycloak_admin_password` to what you prefer.
 
-#### Deployment script
+You can modify the settings to your liking, but the rest of the workshop will assume the above being set.
 
-Run the deployment script with `-h` option
+To install EnMasse, first log in to your OpenShift cluster, then run the playbook:
 
 ```
-./enmasse-0.13.2/deploy-openshift.sh -h
-```
-
-In this workshop, we will deploy using the standard (Keycloak) authentication service, use a unique id as your namespace, and tell it to deploy to the OpenShift cluster.
-Set $NAMSPACE to the OpenShift project you will be using through this workshop:
-
-```
-export USER_ID=<something>
-export USER=user$USER_ID
-export NAMESPACE=workspace-$USER_ID
-export OPENSHIFT_MASTER=<something>
-
-./enmasse-0.13.2/deploy-openshift.sh -a standard -n $NAMESPACE -m $OPENSHIFT_MASTER -u $USER
+oc login -u developer -p developer https://localhost:8443 
+ansible-playbook enmasse/ansible/playbooks/openshift/workshop.yml
 ```
 
 #### Startup
 
-You can observe the state of the EnMasse cluster using `oc get pods -n $NAMESPACE`. When all the pods are in the `Running` state, the cluster is ready. While waiting, go to the OpenShift console.
+You can observe the state of the EnMasse cluster using `oc get pods -n enmasse-workshop`. When all the pods are in the `Running` state, the cluster is ready. While waiting, go to the OpenShift console.
 
 In the OpenShift console, you can see the different deployments for the various EnMasse components. You can go into each pod and look at the logs. If we go to the address controller log, you can see that its creating a 'default' address space.
 
-#### Authenticating
+#### Authentication and Authorization
 
-Go to the OpenShift console, application -> routes, and click on the hostname for the 'keycloak' route. This should bring you to the keycloak admin console. The admin user is protected by an automatically generated password, so we need to extract that as well before being able to create users.
+Go to the OpenShift console, application -> routes, and click on the hostname for the 'keycloak' route. This should bring you to the keycloak admin console. The admin user is protected by the password that was set in the playbook.
 
-```
-oc extract secret/keycloak-credentials -n $NAMESPACE
-cat admin.username
-cat admin.password
-```
-
-In the Keycloak UI, create a new user, and a set of credentials for that user. Make sure the user is
+In the Keycloak UI, make sure you are in the 'default' realm. Then create a new user, and a set of credentials for that user. Make sure the user is
 enabled, and that the credentials are not marked as temporary.
 
 For this workshop we could use following users for example :
 
 * _console_ : as a "real" user who uses the console for creating addresses
-* _deviceX_ : as deviceX (i.e. device1, device2, ...) user
-* _sparkdriver_ : as Spark driver application user
+* _deviceX_ : as deviceX (i.e. device1, device2, ...) user who can only send/recv from a particular address
+* _sparkdriver_ : as Spark driver application user 
 * _thermostat_ : as thermostat application user
 
-It's clear that this workshop involves a "real" user who is in charge to create and configure the addresses and some other users which are relaled to applications running in the cluster and devices running in the field.
+It's clear that this workshop involves a "real" user who is in charge to create and configure the addresses and some other users which are related to applications running in the cluster and devices running in the field.
+
+It is now time to create some authorization rules to ensure the different users can only access the
+addresses assigned. This is done by creating groups with names on the form `send_myqueue` and have a
+user join that group to gain the permission (to send messages to address `myqueue`). We can for
+example create the following groups that will match the addresses that we will create later:
+
+* manage
+* send\_temperature
+* recv\_temperature
+* send\_max
+* recv\_max
+* send\_control
+* recv\_control
+
+To enable authorization, we need to have the users join the appropriate groups. For this workshop we
+can use the following mapping:
+
+* console - manage
+* deviceX - send\_temperature, recv\_control/deviceX
+* sparkdriver - recv\_temperature, send\_max
+* thermostat - recv\_max, send\_control*
+
+You can edit the groups for each user by editing the user and clicking on the groups tab. This ensures that none of the components can access addresses they should not access.
 
 #### Creating messaging addresses
 
@@ -135,7 +151,7 @@ An address space is a group of addresses that can be accessed through a single c
 protocol). This means that clients connected to the endpoints of an address space can send messages
 to or receive messages from any address it is authorized to send messages to or receive messages
 from within that address space. An address space can support multiple protocols, which is defined by
-the address space type.
+the address space type. In this workshop, we only have 1 address space 'default' of type 'standard'.
 
 An address is part of an address space and represents a destination used for sending and receiving
 messages. An address has a type, which defines the semantics of sending messages to and receiving
@@ -148,7 +164,6 @@ In the 'standard' address space, we have 4 types of addresses.
    * **queue** : queue on broker
    * **topic** : pub/sub on broker
 
-
 ##### Creating addresses for this workshop
 
 Go to the console, and locate the 'console' route. Click on the link to get to the EnMasse console.
@@ -157,7 +172,7 @@ Create an addresses for your IoT sensors to report metrics on:
 
    * _temperature_ : type topic - used by devices to report temperature
    * _max_ : type anycast - used by Spark driver to report the max temperature
-   * _control_ : type topic - used to send control messages to devices. Per-device control messages will be sent to control/$device-id
+   * _control/deviceX_ : type topic - used to send control messages to devices. Per-device control messages will be sent to control/$device-id
 
 ### Installing Apache Spark
 
