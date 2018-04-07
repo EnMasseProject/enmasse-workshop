@@ -137,9 +137,9 @@ To enable authorization, we need to have the users join the appropriate groups. 
 can use the following mapping:
 
 * console - manage
-* deviceX - send\_temperature, recv\_control
+* deviceX - send\_temperature, recv\_control/deviceX
 * sparkdriver - recv\_temperature, send\_max
-* thermostat - recv\_max, send\_control
+* thermostat - recv\_max, send\_control*
 
 You can edit the groups for each user by editing the user and clicking on the groups tab. This ensures that none of the components can access addresses they should not access.
 
@@ -172,7 +172,7 @@ Create an addresses for your IoT sensors to report metrics on:
 
    * _temperature_ : type topic - used by devices to report temperature
    * _max_ : type anycast - used by Spark driver to report the max temperature
-   * _control_ : type topic - used to send control messages to devices. Per-device control messages will be sent to control/$device-id
+   * _control/deviceX_ : type topic - used to send control messages to devices. Per-device control messages will be sent to control/$device-id
 
 ### Installing Apache Spark
 
