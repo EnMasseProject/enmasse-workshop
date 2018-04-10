@@ -16,11 +16,13 @@
 
 package io.enmasse.iot.controller.thermostat;
 
+import io.enmasse.example.common.AppCredentials;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.net.PemTrustOptions;
 import io.vertx.proton.*;
 import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.messaging.Data;
@@ -39,17 +41,19 @@ public class Thermostat extends AbstractVerticle {
     private final int messagingPort;
     private final String username;
     private final String password;
+    private final String serverCert;
     private final String notificationAddress;
     private final String controlPrefix;
     private final int minTemp;
     private final int maxTemp;
     private ProtonConnection connection;
 
-    public Thermostat(String messagingHost, int messagingPort, String username, String password, String notificationAddress, String controlPrefix, int minTemp, int maxTemp) {
+    public Thermostat(String messagingHost, int messagingPort, String username, String password, String serverCert, String notificationAddress, String controlPrefix, int minTemp, int maxTemp) {
         this.messagingHost = messagingHost;
         this.messagingPort = messagingPort;
         this.username = username;
         this.password = password;
+        this.serverCert = serverCert;
         this.notificationAddress = notificationAddress;
         this.controlPrefix = controlPrefix;
         this.minTemp = minTemp;
@@ -59,7 +63,14 @@ public class Thermostat extends AbstractVerticle {
     @Override
     public void start(Future<Void> startPromise) {
         ProtonClient alarmClient = ProtonClient.create(vertx);
-        alarmClient.connect(messagingHost, messagingPort, username, password, connection -> {
+        ProtonClientOptions options = new ProtonClientOptions();
+        if (serverCert != null ){
+            options.setPemTrustOptions(new PemTrustOptions()
+                    .addCertValue(Buffer.buffer(serverCert)))
+                .setSsl(true)
+                .setHostnameVerificationAlgorithm("");
+        }
+        alarmClient.connect(options, messagingHost, messagingPort, username, password, connection -> {
             if (connection.succeeded()) {
                 log.info("Connected to {}:{}", messagingHost, messagingPort);
                 ProtonConnection connectionHandle = connection.result();
@@ -132,12 +143,9 @@ public class Thermostat extends AbstractVerticle {
         sender.open();
     }
 
-    public static void main(String [] args) throws IOException {
+    public static void main(String [] args) throws Exception {
         Properties properties = loadProperties("config.properties");
-        String messagingHost = properties.getProperty("service.hostname", "messaging.enmasse.svc");
-        int messagingPort = Integer.parseInt(properties.getProperty("service.port", "5672"));
-        String username = properties.getProperty("service.username", "test");
-        String password = properties.getProperty("service.password", "test");
+        AppCredentials appCredentials = AppCredentials.create();
 
         String maxAddress = properties.getProperty("address.max", "max");
         String controlPrefix = properties.getProperty("address.control.prefix", "control");
@@ -146,7 +154,7 @@ public class Thermostat extends AbstractVerticle {
         int maxTemp = Integer.parseInt(properties.getProperty("control.temperature.max", "25"));
 
         Vertx vertx = Vertx.vertx();
-        vertx.deployVerticle(new Thermostat(messagingHost, messagingPort, username, password, maxAddress, controlPrefix, minTemp, maxTemp));
+        vertx.deployVerticle(new Thermostat(appCredentials.getHostname(), appCredentials.getPort(), appCredentials.getUsername(), appCredentials.getPassword(), appCredentials.getX509Certificate(), maxAddress, controlPrefix, minTemp, maxTemp));
     }
 
     private static Properties loadProperties(String resource) throws IOException {

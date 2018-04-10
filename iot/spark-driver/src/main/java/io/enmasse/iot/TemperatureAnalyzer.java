@@ -49,7 +49,7 @@ public class TemperatureAnalyzer {
 
     private static final Logger log = LoggerFactory.getLogger(TemperatureAnalyzer.class);
 
-    private static final String APP_NAME = "TemperatureAnalyzer";
+    private static final String APP_NAME = System.getenv("SPARK_APP"); //"TemperatureAnalyzer";
     private static final Duration BATCH_DURATION = new Duration(1000);
 
     private static final String CHECKPOINT_DIR = "/tmp/spark-streaming-amqp";
@@ -75,8 +75,8 @@ public class TemperatureAnalyzer {
         log.info("AMQP messaging service hostname {}:{}", host, port);
 
         // getting credentials for authentication
-        username = System.getenv("SPARK_DRIVER_USERNAME");
-        password = System.getenv("SPARK_DRIVER_PASSWORD");
+        username = System.getenv("MESSAGING_USERNAME");
+        password = System.getenv("MESSAGING_PASSWORD");
         log.info("Credentials {}/{}", username, password);
 
         JavaStreamingContext ssc = JavaStreamingContext.getOrCreate(CHECKPOINT_DIR, TemperatureAnalyzer::createStreamingContext);
