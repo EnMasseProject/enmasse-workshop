@@ -4,30 +4,34 @@ You gain insight into deploying and operating an EnMasse cluster, and connect it
 
 ## Prerequisites
 
-This tutorial uses [Ansible](www.ansible.org) to deploy components to OpenShift. To build the java code, you need [Maven](https://maven.apache.org/) already installed on the machine.
-If you don't have that, there is the [official installation guide](https://maven.apache.org/install.html) for doing that. Finally, the [OpenShift](https://www.openshift.org) client tools is used.
+This tutorial can either be run from scratch where you install OpenShift, EnMasse and Spark. You
+might also have an environment setup for you with these components, in which case you can skip the
+parts marked optional. When installing from scratch, tutorial uses [Ansible](www.ansible.org) to deploy components to OpenShift.
 
-## Setting up
+To build the java code, you need [Maven](https://maven.apache.org/) already installed on the machine.  If you don't have that, there is the [official installation guide](https://maven.apache.org/install.html) for doing that. Finally, the [OpenShift](https://www.openshift.org) client tools is used.
 
-In this workshop we will be deploying 4 different components:
+## Overview
+
+In this workshop we will be working on 5 different components:
 
 * EnMasse messaging service
 * A Spark cluster for doing analytics
+* A Spark driver containing the analytics code
 * A Thermostat application performing command & control of devices
 * One or more IoT device simulators
 
-The first 2 will be deployed directly to OpenShift. The thermostat will be built and
+The first 2 will be deployed directly to OpenShift and may be already setup for you. The thermostat will be built and
 deployed to OpenShift from your laptop, and the device IoT simulator will be running locally on your laptop.
 
 ![deployment](images/demo_deployment.png)
 
-### (Optional) Installing OpenShift
+## (Optional) Installing OpenShift
 
-#### Downloading and installing minishift
+### Downloading and installing minishift
 
 If you don't have an OpenShift cluster available, you can use [minishift](https://github.com/minishift/minishift/) to run OpenShift locally on your laptop. Minishift supports all major OS platforms.  Go to https://github.com/minishift/minishift/releases and select the latest version and the download for your OS.
 
-#### Starting minishift
+### Starting minishift
 
 For this workshop, you need at least 4GB of RAM for your minishift instance since we're running both EnMasse and
 Spark on a local OpenShift cluster.
@@ -42,7 +46,7 @@ Once this command completes, the OpenShift cluster should be ready to use.
 
 Take a few minutes to familiarize yourself with the OpenShift console. If you use minishift, you can run `minishift dashboard` which will open a window in your web browser. With minishift, you can login with username <b>developer</b> and password <b>developer</b>.
 
-## Getting OC tools
+### Getting OC tools
 
 In order to execute commands against the OpenShift cluster, an `oc` client tool is needed.
 Go to [OpenShift Origin client tools releases](https://github.com/openshift/origin/releases/) and download
@@ -58,17 +62,15 @@ Then add the folder with the `oc` tools to the `PATH` :
 PATH=$PATH:openshift-origin-client-tools-v3.7.2-282e43f-linux-64bit.tar.gz
 ```
 
-## EnMasse messaging service
+## (Optional) Installing EnMasse
 
 EnMasse is an open source messaging platform, with focus on scalability and performance. EnMasse can run on your own infrastructure or in the cloud, and simplifies the deployment of messaging infrastructure.
 
 For this workshop, all messages will flow through EnMasse in some way.
 
-### Installing EnMasse
-
 The EnMasse version used in this workshop can be found in the `enmasse` directory. We will use an [Ansible](www.ansible.org) playbook to install EnMasse and have a look at its options.
 
-#### Playbook
+### Playbook
 
 This workshop will use the following [playbook](enmasse/ansible/playbooks/openshift/workshop.yml):
 
@@ -98,13 +100,66 @@ oc login -u developer -p developer https://localhost:8443
 ansible-playbook enmasse/ansible/playbooks/openshift/workshop.yml
 ```
 
-#### Startup
+### Startup
 
 You can observe the state of the EnMasse cluster using `oc get pods -n enmasse-workshop`. When all the pods are in the `Running` state, the cluster is ready. While waiting, go to the OpenShift console.
 
 In the OpenShift console, you can see the different deployments for the various EnMasse components. You can go into each pod and look at the logs. If we go to the address controller log, you can see that its creating a 'default' address space.
 
-#### Authentication and Authorization
+## (Optional) Installing Apache Spark
+
+An official support for Apache Spark on OpenShift is provided by the [radanalytics.io](https://radanalytics.io/) project by means of
+the Oshinko application with a Web UI for deploying a Spark cluster. Other than using such a Web UI, a CLI tool is available as well which is used for this workshop.
+
+Go to [Oshinko CLI downloads](https://github.com/radanalyticsio/oshinko-cli/releases) and download
+the latest release (0.3.1 as of time of writing). Unpack the release:
+
+```
+tar xvf oshinko_v0.3.1_linux_amd64.tar.gz
+```
+
+Then use the following command in order to deploy a Spark cluster made by one master node and one slave node.
+
+```
+export SPARK_NAME=<something>
+
+oc new-project spark
+./oshinko_linux_amd64/oshinko create $SPARK_NAME --masters=1 --workers=1
+```
+
+## IoT Application
+
+Now that the cluster has been set up, its time to work on the example application. First, we will
+provision messaging infrastructure to use with the application.
+
+### Provisioning messaging
+
+Go to the OpenShift Console.
+
+In the OpenShift Service Catalog overview, select either of "EnMasse (standard)" or "EnMasse (brokered)".
+
+![Catalog](images/catalog.png)
+
+Select among the available plans. Select the "Create Project" in the drop-down box.
+
+Use the same value for the "name" field. The address space will be provisioned and may take a few
+minutes.
+
+![Provision](images/provision2.png)
+
+Skip binding at this point, we will perform the bind later.
+
+![Provision](images/provision3.png)
+
+If you go to your project, you should see the service provisioning in progress.
+
+![MyApp](images/myapp1.png)
+
+Once the provisioning is complete
+
+### Authentication and Authorization
+
+# TODO: Fetch credentials from binding
 
 Go to the OpenShift console, application -> routes, and click on the hostname for the 'keycloak' route. This should bring you to the keycloak admin console. The admin user is protected by the password that was set in the playbook.
 
@@ -143,7 +198,7 @@ can use the following mapping:
 
 You can edit the groups for each user by editing the user and clicking on the groups tab. This ensures that none of the components can access addresses they should not access.
 
-#### Creating messaging addresses
+### Creating messaging addresses
 
 In EnMasse, you have the concepts of address spaces and addresses.
 
@@ -164,7 +219,7 @@ In the 'standard' address space, we have 4 types of addresses.
    * **queue** : queue on broker
    * **topic** : pub/sub on broker
 
-##### Creating addresses for this workshop
+### Creating addresses for this workshop
 
 Go to the console, and locate the 'console' route. Click on the link to get to the EnMasse console.
 
@@ -174,65 +229,23 @@ Create an addresses for your IoT sensors to report metrics on:
    * _max_ : type anycast - used by Spark driver to report the max temperature
    * _control/deviceX_ : type topic - used to send control messages to devices. Per-device control messages will be sent to control/$device-id
 
-### Installing Apache Spark
-
-An official support for Apache Spark on OpenShift is provided by the [radanalytics.io](https://radanalytics.io/) project by means of
-the Oshinko application with a Web UI for deploying a Spark cluster. Other than using such a Web UI, a CLI tool is available as well which is used for this workshop.
-
-Go to [Oshinko CLI downloads](https://github.com/radanalyticsio/oshinko-cli/releases) and download
-the latest release (0.3.1 as of time of writing). Unpack the release:
-
-```
-tar xvf oshinko_v0.3.1_linux_amd64.tar.gz
-```
-
-Then use the following command in order to deploy a Spark cluster made by one master node and one slave node.
-
-```
-export SPARK_NAME=<something>
-
-./oshinko_linux_amd64/oshinko create $SPARK_NAME --masters=1 --workers=1
-```
 
 ### Deploying the "Temperature Analyzer" Spark driver
 
-The `spark-driver` directory provides the Spark Streaming driver application and a Docker image for running the related Spark driver inside the cluster. Using `minishift`, we need that the following Docker images (built from the source) will be available in the local `minishift` Docker registry. For this reason, it's needed to run the following command first :
+The `spark-driver` directory provides the Spark Streaming driver application and a Docker image for running the related Spark driver inside the cluster. The spark-driver is deployed by building and running it on the OpenShift cluster.  The spark-driver uses the [fabric8-maven-plugin](https://github.com/fabric8io/fabric8-maven-plugin) to create a docker image, an OpenShift deployment config, and deploy the spark-driver into OpenShift.
+
 
 ```
-eval $(minishift docker-env)
+mvn clean package fabric8:resource fabric8:build fabric8:deploy -Dspark.master.host=myspark.spark.svc -Dspark.app=myapp
 ```
 
-In order to set as `DOCKER_HOST`, the `minishift` environment and all the Docker images will be built using that environment and will be available in `minishift` Docker registry.
+This command will package the application and build a Docker image deployed to OpenShift.
 
-This application can be packaged running the following command from such directory.
-
-```
-mvn clean install package -Pbuild-docker-image
-```
-
-This command will package the application and build a Docker image ready to be deployed on OpenShift.
-In order to deploy the Spark driver, an OpenShift template is available which can be instantiated with the following command:
-
-```
-cd iot/spark-driver
-oc process -f target/fabric8/spark-driver-template.yaml SPARK_MASTER_HOST=$SPARK_NAME SPARK_DRIVER_USERNAME=<user> SPARK_DRIVER_PASSWORD=<password> | oc create -f -
-```
-It's possible to configure the Spark driver changing these parameters:
-
-* _SPARK_MASTER_HOST_ : hostname of the Spark master node
-* _SPARK_MASTER_PORT_ : the port of the Spark master node (default value is 7077)
-* _SPARK_DRIVER_USERNAME_ : username provided by Keycloak for driver authentication with EnMasse
-* _SPARK_DRIVER_PASSWORD_ : password provided by Keycloak for driver authentication with EnMasse
+#### TODO: Bind credentials
 
 ### Deploying the "Thermostat" application
 
 The thermostat application uses the [fabric8-maven-plugin](https://github.com/fabric8io/fabric8-maven-plugin) to create a docker image, an OpenShift deployment config, and deploy the thermostat into OpenShift.
-
-First, modify the thermostat configuration in
-`iot/thermostat/src/main/resources/config.properties`. Make sure that `service.hostname` matches
-that of the messaging service, and that `service.username` and `service.password` matches the
-credentials you created in Keycloak. You can also change the addresses used in this workshop, but it
-is not needed for the thermostat to run.
 
 To build the application and a docker image:
 
@@ -248,6 +261,8 @@ mvn fabric8:resource fabric8:deploy
 ```
 
 The thermostat will be deployed to the OpenShift cluster. The pod will be named `thermostat-$number` where `$number` is incremented each time you run the deploy command.
+
+#### TODO: Bind credentials
 
 ### Running the IoT simulated devices
 
