@@ -56,9 +56,9 @@ objects:
     selector:
       name: none-authservice
 parameters:
-- description: The docker image to use for the 'none' auth service
+- description: The container image to use for the 'none' auth service
   name: NONE_AUTHSERVICE_IMAGE
-  value: docker.io/enmasseproject/none-authservice:0.17.2
+  value: docker.io/enmasseproject/none-authservice:0.18.0
 - description: The secret to use for the none-authservice certificate
   name: NONE_AUTHSERVICE_CERT_SECRET_NAME
   value: none-authservice-cert

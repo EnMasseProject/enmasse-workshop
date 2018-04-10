@@ -94,7 +94,7 @@ while getopts a:c:de:gm:n:o:p:st:u:yvh opt; do
             echo "  -h                   show this help message"
             echo "  -a \"none standard\" Deploy given authentication services (default: \"none\")"
             echo "  -c                   CA certificate to use in address controller"
-            echo "  -d                   create an all-in-one docker OpenShift on localhost"
+            echo "  -d                   create an all-in-one OpenShift container on localhost"
             echo "  -e                   Environment label for this EnMasse deployment"
             echo "  -n NAMESPACE         OpenShift project name to install EnMasse into (default: $DEFAULT_NAMESPACE)"
             echo "  -m MASTER            OpenShift master URI to login against (default: https://localhost:8443)"
@@ -179,6 +179,8 @@ do
         create_self_signed_cert "oc" "standard-authservice.${NAMESPACE}.svc.cluster.local" "standard-authservice-cert"
         runcmd "oc create secret generic keycloak-credentials --from-literal=admin.username=admin --from-literal=admin.password=$KEYCLOAK_PASSWORD" "Create secret with keycloak admin credentials"
         runcmd "oc process -f $KEYCLOAK_TEMPLATE | oc create -n $NAMESPACE -f -" "Create standard authservice"
+        httpUrl="https://$(oc get service standard-authservice -o jsonpath={.spec.clusterIP}):8443/auth"
+        runcmd "oc create configmap keycloak-config --from-literal=hostname=standard-authservice.${NAMESPACE}.svc --from-literal=httpUrl=$httpUrl --from-literal=port=5671 --from-literal=caSecretName=standard-authservice-cert" "Create standard authentication service configuration"
     fi
 done
 
@@ -187,16 +189,16 @@ if [ "$ENVIRONMENT" != "" ]; then
 fi
 
 if [ $MODE == "multitenant" ]; then
-    TEMPLATE_PARAMS="$TEMPLATE_PARAMS ENABLE_RBAC=true"
+    TEMPLATE_PARAMS="$TEMPLATE_PARAMS ENABLE_RBAC=true IMPERSONATE_USER=$OS_USER"
     if [ -n "$OS_ALLINONE" ]
     then
         runcmd "oc login -u system:admin" "Logging in as system:admin"
         runcmd "oc create -f $CLUSTER_ROLES -n $NAMESPACE" "Create cluster roles needed for RBAC"
-        runcmd "oc adm policy add-cluster-role-to-user enmasse-namespace-admin system:serviceaccount:${NAMESPACE}:enmasse-admin" "Granting admin rights to enmasse-admin"
+        runcmd "oc adm policy add-cluster-role-to-user enmasse-admin system:serviceaccount:${NAMESPACE}:enmasse-admin" "Granting admin rights to enmasse-admin"
         runcmd "oc login -u $OS_USER $OC_ARGS $MASTER_URI" "Login as $OS_USER"
     else
         echo "Please create cluster roles required to run EnMasse with RBAC: 'oc create -f $CLUSTER_ROLES -n $NAMESPACE'"
-        echo "Please add enmasse-namespace-admin role to system:serviceaccount:${NAMESPACE}:enmasse-admin before creating instances: 'oc adm policy add-cluster-role-to-user enmasse-namespace-admin system:serviceaccount:${NAMESPACE}:enmasse-admin'"
+        echo "Please add enmasse-admin role to system:serviceaccount:${NAMESPACE}:enmasse-admin before creating instances: 'oc adm policy add-cluster-role-to-user enmasse-admin system:serviceaccount:${NAMESPACE}:enmasse-admin'"
     fi
 fi
 
