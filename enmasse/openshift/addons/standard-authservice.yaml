@@ -42,13 +42,18 @@ objects:
               secretKeyRef:
                 key: admin.password
                 name: ${KEYCLOAK_SECRET_NAME}
+          - name: KEYCLOAK_SASL_XOAUTH_BASE_URI
+            valueFrom:
+              configMapKeyRef:
+                key: httpUrl
+                name: ${KEYCLOAK_CONFIGMAP_NAME}
           image: ${STANDARD_AUTHSERVICE_IMAGE}
           livenessProbe:
             httpGet:
               path: /auth
               port: https
               scheme: HTTPS
-            initialDelaySeconds: 120
+            initialDelaySeconds: 60
           name: keycloak
           ports:
           - containerPort: 5671
@@ -60,7 +65,7 @@ objects:
               path: /auth
               port: https
               scheme: HTTPS
-            initialDelaySeconds: 120
+            initialDelaySeconds: 60
           resources:
             limits:
               memory: 2Gi
@@ -122,16 +127,11 @@ objects:
       spec:
         containers:
         - env:
-          - name: KEYCLOAK_HOSTNAME
+          - name: KEYCLOAK_URI
             valueFrom:
               configMapKeyRef:
-                key: hostname
-                name: ${KEYCLOAK_CONTROLLER_CONFIGMAP_NAME}
-          - name: KEYCLOAK_PORT
-            valueFrom:
-              configMapKeyRef:
-                key: port
-                name: ${KEYCLOAK_CONTROLLER_CONFIGMAP_NAME}
+                key: httpUrl
+                name: ${KEYCLOAK_CONFIGMAP_NAME}
           - name: KEYCLOAK_ADMIN_USER
             valueFrom:
               secretKeyRef:
@@ -154,15 +154,6 @@ objects:
               memory: 256Mi
             requests:
               memory: 256Mi
-- apiVersion: v1
-  data:
-    hostname: standard-authservice
-    port: '8443'
-  kind: ConfigMap
-  metadata:
-    labels:
-      app: enmasse
-    name: keycloak-controller-config
 - apiVersion: v1
   kind: Service
   metadata:
@@ -197,21 +188,21 @@ objects:
       kind: Service
       name: standard-authservice
 parameters:
-- description: The docker image to use for the keycloak plugin image
+- description: The container image to use for the keycloak plugin image
   name: KEYCLOAK_PLUGIN_IMAGE
-  value: docker.io/enmasseproject/keycloak-plugin:0.17.2
-- description: The docker image to use for the 'standard' auth service
+  value: docker.io/enmasseproject/keycloak-plugin:0.18.0
+- description: The container image to use for the 'standard' auth service
   name: STANDARD_AUTHSERVICE_IMAGE
   value: jboss/keycloak-openshift:3.4.3.Final
 - description: The secret where keycloak credentials are stored
   name: KEYCLOAK_SECRET_NAME
   value: keycloak-credentials
-- description: The docker image to use for the keycloak controller
+- description: The container image to use for the keycloak controller
   name: KEYCLOAK_CONTROLLER_IMAGE
-  value: docker.io/enmasseproject/keycloak-controller:0.17.2
+  value: docker.io/enmasseproject/keycloak-controller:0.18.0
 - description: The configmap used to configure the keycloak controller
-  name: KEYCLOAK_CONTROLLER_CONFIGMAP_NAME
-  value: keycloak-controller-config
+  name: KEYCLOAK_CONFIGMAP_NAME
+  value: keycloak-config
 - description: The secret containing the tls certificate and key
   name: KEYCLOAK_CERT_SECRET_NAME
   value: standard-authservice-cert
