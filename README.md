@@ -4,23 +4,23 @@ You gain insight into deploying and operating an EnMasse cluster, and connect it
 
 ## Prerequisites
 
-This tutorial can either be run from scratch where you install OpenShift, EnMasse and Spark. You
+This tutorial can be run from scratch where you install OpenShift, EnMasse and Spark. You
 might also have an environment setup for you with these components, in which case you can skip the
-parts marked optional. When installing from scratch, tutorial uses [Ansible](www.ansible.org) to deploy components to OpenShift.
+parts marked optional. When installing from scratch, tutorial requires [Ansible](www.ansible.org) to deploy components to OpenShift.
 
-To build the java code, you need [Maven](https://maven.apache.org/) already installed on the machine.  If you don't have that, there is the [official installation guide](https://maven.apache.org/install.html) for doing that. Finally, the [OpenShift](https://www.openshift.org) client tools is used.
+To build the java code, you need [Maven](https://maven.apache.org/) already installed on the machine.  If you don't have that, there is the [official installation guide](https://maven.apache.org/install.html) for doing that. Finally, the [OpenShift](https://www.openshift.org) client tools is used for several operations.
 
 ## Overview
 
-In this workshop we will be working on 5 different components:
+In this workshop we will be working with 5 different components:
 
-* EnMasse messaging service
+* An EnMasse messaging service
 * A Spark cluster for doing analytics
 * A Spark driver containing the analytics code
 * A Thermostat application performing command & control of devices
 * One or more IoT device simulators
 
-The first 2 will be deployed directly to OpenShift and may be already setup for you. The thermostat will be built and
+The first 2 will be deployed directly to OpenShift and may be already setup for you. The spark-driver and thermostat will be built and
 deployed to OpenShift from your laptop, and the device IoT simulator will be running locally on your laptop.
 
 ![deployment](images/demo_deployment.png)
@@ -70,7 +70,7 @@ For this workshop, all messages will flow through EnMasse in some way.
 
 The EnMasse version used in this workshop can be found in the `enmasse` directory. We will use an [Ansible](www.ansible.org) playbook to install EnMasse and have a look at its options.
 
-### Playbook
+### Running the playbook
 
 This workshop will use the following [playbook](enmasse/ansible/playbooks/openshift/workshop.yml):
 
@@ -78,10 +78,9 @@ This workshop will use the following [playbook](enmasse/ansible/playbooks/opensh
 - hosts: localhost
   vars:
     namespace: enmasse-workshop
-    multitenant: false
-    address_space_type: standard
-    address_space_plan: unlimited-standard
+    multitenant: true
     enable_rbac: true
+    service_catalog: true
     keycloak_admin_password: admin
     authentication_services:
       - standard
@@ -89,7 +88,7 @@ This workshop will use the following [playbook](enmasse/ansible/playbooks/opensh
     - enmasse
 ```
 
-This playbook instructs ansible to install EnMasse to the `enmasse-workshop` namespace in OpenShift.  We will use the non-multitenant mode for make it simple, and configure the `standard` address space to be used. We also enable OpenShift RBAC for the REST API and enable the standard authentication service ([Keycloak](www.keycloak.org)) for authentication. If your OpenShift cluster is on a public network, please change the `keycloak_admin_password` to what you prefer.
+This playbook instructs ansible to install EnMasse to the `enmasse-workshop` namespace in OpenShift.  We will use the service catalog integration to make it easy to provision the messaging service. We will also use ([keycloak](www.keycloak.org)) for authentication. If your OpenShift cluster is on a public network, please change the `keycloak_admin_password` to what you prefer.
 
 You can modify the settings to your liking, but the rest of the workshop will assume the above being set.
 
@@ -155,48 +154,8 @@ If you go to your project, you should see the service provisioning in progress.
 
 ![MyApp](images/myapp1.png)
 
-Once the provisioning is complete
-
-### Authentication and Authorization
-
-# TODO: Fetch credentials from binding
-
-Go to the OpenShift console, application -> routes, and click on the hostname for the 'keycloak' route. This should bring you to the keycloak admin console. The admin user is protected by the password that was set in the playbook.
-
-In the Keycloak UI, make sure you are in the 'default' realm. Then create a new user, and a set of credentials for that user. Make sure the user is
-enabled, and that the credentials are not marked as temporary.
-
-For this workshop we could use following users for example :
-
-* _console_ : as a "real" user who uses the console for creating addresses
-* _deviceX_ : as deviceX (i.e. device1, device2, ...) user who can only send/recv from a particular address
-* _sparkdriver_ : as Spark driver application user 
-* _thermostat_ : as thermostat application user
-
-It's clear that this workshop involves a "real" user who is in charge to create and configure the addresses and some other users which are related to applications running in the cluster and devices running in the field.
-
-It is now time to create some authorization rules to ensure the different users can only access the
-addresses assigned. This is done by creating groups with names on the form `send_myqueue` and have a
-user join that group to gain the permission (to send messages to address `myqueue`). We can for
-example create the following groups that will match the addresses that we will create later:
-
-* manage
-* send\_temperature
-* recv\_temperature
-* send\_max
-* recv\_max
-* send\_control
-* recv\_control
-
-To enable authorization, we need to have the users join the appropriate groups. For this workshop we
-can use the following mapping:
-
-* console - manage
-* deviceX - send\_temperature, recv\_control/deviceX
-* sparkdriver - recv\_temperature, send\_max
-* thermostat - recv\_max, send\_control*
-
-You can edit the groups for each user by editing the user and clicking on the groups tab. This ensures that none of the components can access addresses they should not access.
+Once the provisioning is complete, we can login to the console and create the addresses we need for
+the workshop.
 
 ### Creating messaging addresses
 
@@ -206,34 +165,52 @@ An address space is a group of addresses that can be accessed through a single c
 protocol). This means that clients connected to the endpoints of an address space can send messages
 to or receive messages from any address it is authorized to send messages to or receive messages
 from within that address space. An address space can support multiple protocols, which is defined by
-the address space type. In this workshop, we only have 1 address space 'default' of type 'standard'.
+the address space type.
+
+Each messaging service provisioned in the service catalog creates a new address space. Conceptually,
+an address space may share messaging infrastructure with other address spaces.
 
 An address is part of an address space and represents a destination used for sending and receiving
 messages. An address has a type, which defines the semantics of sending messages to and receiving
-messages from that address.
+messages from that address. An address also has a plan, which determines the amount of resources
+provisioned to support the address.
 
 In the 'standard' address space, we have 4 types of addresses.
 
-   * **multicast** : 'direct' one-to-many using dispatch router
-   * **anycast** : 'direct' peer-2-peer using dispatch router
-   * **queue** : queue on broker
-   * **topic** : pub/sub on broker
+   * **multicast** : 'direct' one-to-many
+   * **anycast** : 'direct' peer-2-peer
+   * **queue** : queue
+   * **topic** : pub/sub
 
 ### Creating addresses for this workshop
 
-Go to the console, and locate the 'console' route. Click on the link to get to the EnMasse console.
+Login to the messaging console URL given by the provisioned service. You should be automatically
+logged in with your OpenShift credentials (*NOTE* Right now this is not the case, you need to create
+a user in keycloak with 'manage' privileges).
 
-Create an addresses for your IoT sensors to report metrics on:
+Create the following addresses:
 
    * _temperature_ : type topic - used by devices to report temperature
    * _max_ : type anycast - used by Spark driver to report the max temperature
    * _control/deviceX_ : type topic - used to send control messages to devices. Per-device control messages will be sent to control/$device-id
 
+### Authentication and Authorization
+
+In this workshop we aim to setup a secure-by-default IoT solution, so we need to define the 
+applications and what addresses they need to access. Before we create the bindings we need, lets
+define the mapping:
+
+* deviceX - send: temperature, recv: control/deviceX
+* spark-driver - recv: temperature, send: max
+* thermostat - recv: max, send: control*
+
+We will create the bindings to each of the application as we deploy them.
 
 ### Deploying the "Temperature Analyzer" Spark driver
 
 The `spark-driver` directory provides the Spark Streaming driver application and a Docker image for running the related Spark driver inside the cluster. The spark-driver is deployed by building and running it on the OpenShift cluster.  The spark-driver uses the [fabric8-maven-plugin](https://github.com/fabric8io/fabric8-maven-plugin) to create a docker image, an OpenShift deployment config, and deploy the spark-driver into OpenShift.
 
+To deploy the spark driver:
 
 ```
 mvn clean package fabric8:resource fabric8:build fabric8:deploy -Dspark.master.host=myspark.spark.svc -Dspark.app=myapp
@@ -241,7 +218,15 @@ mvn clean package fabric8:resource fabric8:build fabric8:deploy -Dspark.master.h
 
 This command will package the application and build a Docker image deployed to OpenShift.
 
-#### TODO: Bind credentials
+Once the driver has been deployed, we need to create a binding with the permissions we defined above. Click on "Create binding" to open the dialog to create a binding. Set `sendAddresses` to `max` and `recvAddresses` to `temperature`.
+
+![Binding1](images/binding1.png)
+
+Go to the secret that was created and click "Add to application". This will allow you modify your application deployment to mount the secret so that the example application can use it. Select the option to mount it and enter `/etc/app-credentials` as the mount point.
+
+![Secret2](images/secret2.png)
+
+The spark-driver will now redeploy and read the credentials from the binding.
 
 ### Deploying the "Thermostat" application
 
@@ -262,7 +247,15 @@ mvn fabric8:resource fabric8:deploy
 
 The thermostat will be deployed to the OpenShift cluster. The pod will be named `thermostat-$number` where `$number` is incremented each time you run the deploy command.
 
-#### TODO: Bind credentials
+Once the thermostat has been deployed, we need to create a binding with the permissions we defined above. Click on "Create binding" to open the dialog to create a binding. Set `sendAddresses` to `control*` and `recvAddresses` to `max`.
+
+![Binding1](images/binding1.png)
+
+Go to the secret that was created and click "Add to application". This will allow you modify your application deployment to mount the secret so that the example application can use it. Select the option to mount it and enter `/etc/app-credentials` as the mount point.
+
+![Secret2](images/secret2.png)
+
+The thermostat will now redeploy and read the credentials from the binding.
 
 ### Running the IoT simulated devices
 
@@ -280,8 +273,8 @@ The console application can be configured using a `device.properties` file which
 * _service.temperature.address_ : address on which temperature values will be sent (should not be changed from the _temperature_ value)
 * _service.control.prefix_ : prefix for defining the control address for receiving command (should not be changed from the _control_ value)
 * _device.id_ : device identifier
-* _device.username_ : device username (from Keyclock) for EnMasse authentication
-* _device.password_ : device password (from Keyclock) for EnMasse authentication
+* _device.username_ : device username (from binding) for EnMasse authentication
+* _device.password_ : device password (from binding) for EnMasse authentication
 * _device.update.interval_ : periodic interval for sending temperature values
 * _device.transport.class_ : transport class to use in terms of protocol. Possible values are _io.enmasse.iot.transport.AmqpClient_ for AMQP and _io.enmasse.iot.transport.MqttClient_ for MQTT
 * _device.transport.ssl.servercert_ : server certificate file path for accessing EnMasse using a TLS connection
@@ -290,10 +283,9 @@ The console application can be configured using a `device.properties` file which
 
 #### Getting TLS certificates
 
-Connections to EnMasse running on OpenShift are possible only thrugh TLS protocol.
+Connections to EnMasse running on OpenShift are possible only through TLS protocol.
 In order to have such connections working, we need to get the server certificate that the device has to use for establishing the TLS connection.
 Because devices can connect using AMQP or MQTT we need to extract two different server certificates for that.
-First of all, let's create two different directories for storing the certificates :
 
 ```
 mkdir amqp-certs
