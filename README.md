@@ -184,11 +184,11 @@ In the 'standard' address space, we have 4 types of addresses.
 
 ### Creating addresses for this workshop
 
-Login to the messaging console URL given by the provisioned service. You should be automatically
-logged in with your OpenShift credentials (*NOTE* Right now this is not the case, you need to create
-a user in keycloak with 'manage' privileges).
+Login to the messaging console URL given by the provisioned service. You should be redirected to the
+authentication service. On the side of the login form, you can see a button named "OpenShift".
+Click on that to authenticate your user using your OpenShift credentials.
 
-Create the following addresses:
+Once logged in, create the following addresses:
 
    * _temperature_ : type topic - used by devices to report temperature
    * _max_ : type anycast - used by Spark driver to report the max temperature
@@ -223,6 +223,7 @@ Once the driver has been deployed, we need to create a binding with the permissi
 ![Binding1](images/binding1.png)
 
 Go to the secret that was created and click "Add to application". This will allow you modify your application deployment to mount the secret so that the example application can use it. Select the option to mount it and enter `/etc/app-credentials` as the mount point.
+
 
 ![Secret2](images/secret2.png)
 
@@ -283,9 +284,9 @@ The console application can be configured using a `device.properties` file which
 
 #### Getting TLS certificates
 
-Connections to EnMasse running on OpenShift are possible only through TLS protocol.
-In order to have such connections working, we need to get the server certificate that the device has to use for establishing the TLS connection.
-Because devices can connect using AMQP or MQTT we need to extract two different server certificates for that.
+Connections to EnMasse running on OpenShift are possible only through TLS protocol. In order to have such connections working, we need to get the server certificate that the device has to use for establishing the TLS connection. The certificate for the AMQP endpoint can be downloaded through the messaging console. If you are using the standard address space with MQTT, you need to download the cert from the endpoint for now. In a production environment, it is likely that the cluster will be set up with trusted certificates.
+
+For simplicity, the tutorial downloads the certificates from the endpoint.
 
 ```
 mkdir amqp-certs
