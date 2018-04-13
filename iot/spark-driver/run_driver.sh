@@ -45,6 +45,6 @@ echo "Spark master node = " $SPARK_MASTER
 
 ${SPARK_HOME}/bin/spark-submit \
     --class io.enmasse.iot.TemperatureAnalyzer \
-    --name ${SPARK_APP}
+    --name ${SPARK_APP} \
     --master $SPARK_MASTER \
     /spark-driver-1.0-SNAPSHOT.jar
