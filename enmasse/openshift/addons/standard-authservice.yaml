@@ -53,7 +53,7 @@ objects:
               path: /auth
               port: https
               scheme: HTTPS
-            initialDelaySeconds: 60
+            initialDelaySeconds: 120
           name: keycloak
           ports:
           - containerPort: 5671
@@ -132,6 +132,18 @@ objects:
               configMapKeyRef:
                 key: httpUrl
                 name: ${KEYCLOAK_CONFIGMAP_NAME}
+          - name: OAUTH_IDENTITY_PROVIDER_CLIENT_ID
+            valueFrom:
+              configMapKeyRef:
+                key: identityProviderClientId
+                name: ${KEYCLOAK_CONFIGMAP_NAME}
+                optional: true
+          - name: OAUTH_IDENTITY_PROVIDER_CLIENT_SECRET
+            valueFrom:
+              configMapKeyRef:
+                key: identityProviderClientSecret
+                name: ${KEYCLOAK_CONFIGMAP_NAME}
+                optional: true
           - name: KEYCLOAK_ADMIN_USER
             valueFrom:
               secretKeyRef:
@@ -190,7 +202,7 @@ objects:
 parameters:
 - description: The container image to use for the keycloak plugin image
   name: KEYCLOAK_PLUGIN_IMAGE
-  value: docker.io/enmasseproject/keycloak-plugin:0.18.0
+  value: docker.io/lulf/keycloak-plugin:sb4
 - description: The container image to use for the 'standard' auth service
   name: STANDARD_AUTHSERVICE_IMAGE
   value: jboss/keycloak-openshift:3.4.3.Final
@@ -199,7 +211,7 @@ parameters:
   value: keycloak-credentials
 - description: The container image to use for the keycloak controller
   name: KEYCLOAK_CONTROLLER_IMAGE
-  value: docker.io/enmasseproject/keycloak-controller:0.18.0
+  value: docker.io/lulf/keycloak-controller:sb4
 - description: The configmap used to configure the keycloak controller
   name: KEYCLOAK_CONFIGMAP_NAME
   value: keycloak-config

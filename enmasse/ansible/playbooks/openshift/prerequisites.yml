@@ -1,0 +1,10 @@
+- hosts: localhost
+  tasks:
+    - name: Ensure python OpenSSL dependencies are installed.
+      pip:
+        name: pyOpenSSL
+        state: present
+    - name: Ensure python OpenShift dependencies are installed.
+      pip:
+        name: openshift
+        state: present

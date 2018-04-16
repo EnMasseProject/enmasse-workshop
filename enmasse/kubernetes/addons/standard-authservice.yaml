@@ -52,7 +52,7 @@ items:
               path: /auth
               port: https
               scheme: HTTPS
-            initialDelaySeconds: 60
+            initialDelaySeconds: 120
           name: keycloak
           ports:
           - containerPort: 5671
@@ -87,7 +87,7 @@ items:
         - env:
           - name: KEYCLOAK_DIR
             value: /opt/jboss/keycloak
-          image: docker.io/enmasseproject/keycloak-plugin:0.18.0
+          image: docker.io/lulf/keycloak-plugin:sb4
           name: keycloak-plugin
           volumeMounts:
           - mountPath: /opt/jboss/keycloak/providers
@@ -134,6 +134,18 @@ items:
               configMapKeyRef:
                 key: httpUrl
                 name: keycloak-config
+          - name: OAUTH_IDENTITY_PROVIDER_CLIENT_ID
+            valueFrom:
+              configMapKeyRef:
+                key: identityProviderClientId
+                name: keycloak-config
+                optional: true
+          - name: OAUTH_IDENTITY_PROVIDER_CLIENT_SECRET
+            valueFrom:
+              configMapKeyRef:
+                key: identityProviderClientSecret
+                name: keycloak-config
+                optional: true
           - name: KEYCLOAK_ADMIN_USER
             valueFrom:
               secretKeyRef:
@@ -149,7 +161,7 @@ items:
               secretKeyRef:
                 key: tls.crt
                 name: standard-authservice-cert
-          image: docker.io/enmasseproject/keycloak-controller:0.18.0
+          image: docker.io/lulf/keycloak-controller:sb4
           name: keycloak-controller
           resources:
             limits:

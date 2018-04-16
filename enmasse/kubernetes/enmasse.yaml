@@ -87,8 +87,8 @@ items:
       "name": "console"}, "spec": {"ports": [{"name": "https", "port": 8081, "targetPort":
       8080}], "selector": {"role": "agent"}}}], "parameters": [{"description": "The
       container image to use for the message broker", "name": "BROKER_IMAGE", "value":
-      "docker.io/enmasseproject/artemis:0.18.0"}, {"description": "The container image
-      to use for the enmasse agent", "name": "AGENT_IMAGE", "value": "docker.io/enmasseproject/agent:0.18.0"},
+      "docker.io/lulf/artemis:sb4"}, {"description": "The container image to use for
+      the enmasse agent", "name": "AGENT_IMAGE", "value": "docker.io/lulf/agent:sb4"},
       {"description": "Storage capacity required for volume claims", "name": "STORAGE_CAPACITY",
       "value": "2Gi"}, {"description": "The address space this infrastructure is deployed
       for", "name": "ADDRESS_SPACE", "required": true}, {"description": "Certificate
@@ -110,7 +110,8 @@ items:
     standard-space-infra-without-mqtt.json: '{"apiVersion": "v1", "kind": "Template",
       "metadata": {"labels": {"app": "enmasse"}, "name": "standard-space-infra-without-mqtt"},
       "objects": [{"apiVersion": "v1", "kind": "Service", "metadata": {"annotations":
-      {"addressSpace": "${ADDRESS_SPACE}", "io.enmasse.endpointPort": "amqps", "service.alpha.openshift.io/dependencies":
+      {"addressSpace": "${ADDRESS_SPACE}", "enmasse.io/service-port.amqp": 5672, "enmasse.io/service-port.amqps":
+      5671, "io.enmasse.endpointPort": "amqps", "service.alpha.openshift.io/dependencies":
       "[{\"kind\": \"Service\", \"name\": \"queue-scheduler\", \"namespace\": \"\"},
       {\"kind\": \"Service\", \"name\": \"configuration\", \"namespace\": \"\"}, {\"kind\":
       \"Service\", \"name\": \"ragent\", \"namespace\": \"\"}, {\"kind\": \"Service\",
@@ -268,25 +269,25 @@ items:
       { }, \"name\": \"${NAME}\"}]}}}}], \"parameters\": [{\"description\": \"Storage
       capacity required for volume claims\", \"name\": \"STORAGE_CAPACITY\", \"value\":
       \"2Gi\"}, {\"description\": \"The container image to use for the message broker\",
-      \"name\": \"BROKER_IMAGE\", \"value\": \"docker.io/enmasseproject/artemis:0.18.0\"},
-      {\"description\": \"The default image to use as topic forwarder\", \"name\":
-      \"TOPIC_FORWARDER_IMAGE\", \"value\": \"docker.io/enmasseproject/topic-forwarder:0.18.0\"},
-      {\"description\": \"The image to use for the router\", \"name\": \"ROUTER_IMAGE\",
-      \"value\": \"docker.io/enmasseproject/router:0.18.0\"}, {\"description\": \"The
-      link capacity setting for router\", \"name\": \"ROUTER_LINK_CAPACITY\", \"value\":
-      \"50\"}, {\"description\": \"A valid addressSpace name for the address Space\",
-      \"name\": \"ADDRESS_SPACE\", \"required\": true}, {\"description\": \"A valid
-      name for the deployment\", \"name\": \"NAME\", \"required\": true}, {\"description\":
-      \"A valid group id for the deployment\", \"name\": \"CLUSTER_ID\", \"required\":
-      true}, {\"description\": \"The address to use for the queue\", \"name\": \"ADDRESS\",
-      \"value\": \"\"}, {\"description\": \"Name of secret containing router key and
-      certificate\", \"name\": \"COLOCATED_ROUTER_SECRET\", \"required\": true}, {\"description\":
-      \"The hostname of the authentication service used by this address space\", \"name\":
-      \"AUTHENTICATION_SERVICE_HOST\", \"required\": true}, {\"description\": \"The
-      port of the authentication service used by this address space\", \"name\": \"AUTHENTICATION_SERVICE_PORT\",
-      \"required\": true}, {\"description\": \"The secret to use for validating authentication
-      service cert\", \"name\": \"AUTHENTICATION_SERVICE_CA_SECRET\", \"required\":
-      true}, {\"description\": \"The client cert to use as identity against authentication
+      \"name\": \"BROKER_IMAGE\", \"value\": \"docker.io/lulf/artemis:sb4\"}, {\"description\":
+      \"The default image to use as topic forwarder\", \"name\": \"TOPIC_FORWARDER_IMAGE\",
+      \"value\": \"docker.io/lulf/topic-forwarder:sb4\"}, {\"description\": \"The
+      image to use for the router\", \"name\": \"ROUTER_IMAGE\", \"value\": \"docker.io/lulf/router:sb4\"},
+      {\"description\": \"The link capacity setting for router\", \"name\": \"ROUTER_LINK_CAPACITY\",
+      \"value\": \"50\"}, {\"description\": \"A valid addressSpace name for the address
+      Space\", \"name\": \"ADDRESS_SPACE\", \"required\": true}, {\"description\":
+      \"A valid name for the deployment\", \"name\": \"NAME\", \"required\": true},
+      {\"description\": \"A valid group id for the deployment\", \"name\": \"CLUSTER_ID\",
+      \"required\": true}, {\"description\": \"The address to use for the queue\",
+      \"name\": \"ADDRESS\", \"value\": \"\"}, {\"description\": \"Name of secret
+      containing router key and certificate\", \"name\": \"COLOCATED_ROUTER_SECRET\",
+      \"required\": true}, {\"description\": \"The hostname of the authentication
+      service used by this address space\", \"name\": \"AUTHENTICATION_SERVICE_HOST\",
+      \"required\": true}, {\"description\": \"The port of the authentication service
+      used by this address space\", \"name\": \"AUTHENTICATION_SERVICE_PORT\", \"required\":
+      true}, {\"description\": \"The secret to use for validating authentication service
+      cert\", \"name\": \"AUTHENTICATION_SERVICE_CA_SECRET\", \"required\": true},
+      {\"description\": \"The client cert to use as identity against authentication
       service\", \"name\": \"AUTHENTICATION_SERVICE_CLIENT_SECRET\"}, {\"description\":
       \"The hostname to use in sasl init\", \"name\": \"AUTHENTICATION_SERVICE_SASL_INIT_HOST\"},
       {\"description\": \"Memory limits for container\", \"name\": \"BROKER_MEMORY_LIMIT\",
@@ -341,25 +342,25 @@ items:
       \"parameters\": [{\"description\": \"Storage capacity required for volume claims\",
       \"name\": \"STORAGE_CAPACITY\", \"value\": \"2Gi\"}, {\"description\": \"The
       container image to use for the message broker\", \"name\": \"BROKER_IMAGE\",
-      \"value\": \"docker.io/enmasseproject/artemis:0.18.0\"}, {\"description\": \"The
-      default image to use as topic forwarder\", \"name\": \"TOPIC_FORWARDER_IMAGE\",
-      \"value\": \"docker.io/enmasseproject/topic-forwarder:0.18.0\"}, {\"description\":
-      \"The image to use for the router\", \"name\": \"ROUTER_IMAGE\", \"value\":
-      \"docker.io/enmasseproject/router:0.18.0\"}, {\"description\": \"The link capacity
-      setting for router\", \"name\": \"ROUTER_LINK_CAPACITY\", \"value\": \"50\"},
-      {\"description\": \"A valid addressSpace name for the address Space\", \"name\":
-      \"ADDRESS_SPACE\", \"required\": true}, {\"description\": \"A valid name for
-      the deployment\", \"name\": \"NAME\", \"required\": true}, {\"description\":
-      \"A valid group id for the deployment\", \"name\": \"CLUSTER_ID\", \"required\":
-      true}, {\"description\": \"The address to use for the queue\", \"name\": \"ADDRESS\",
-      \"value\": \"\"}, {\"description\": \"Name of secret containing router key and
-      certificate\", \"name\": \"COLOCATED_ROUTER_SECRET\", \"required\": true}, {\"description\":
-      \"The hostname of the authentication service used by this address space\", \"name\":
-      \"AUTHENTICATION_SERVICE_HOST\", \"required\": true}, {\"description\": \"The
-      port of the authentication service used by this address space\", \"name\": \"AUTHENTICATION_SERVICE_PORT\",
-      \"required\": true}, {\"description\": \"The secret to use for validating authentication
-      service cert\", \"name\": \"AUTHENTICATION_SERVICE_CA_SECRET\", \"required\":
-      true}, {\"description\": \"The client cert to use as identity against authentication
+      \"value\": \"docker.io/lulf/artemis:sb4\"}, {\"description\": \"The default
+      image to use as topic forwarder\", \"name\": \"TOPIC_FORWARDER_IMAGE\", \"value\":
+      \"docker.io/lulf/topic-forwarder:sb4\"}, {\"description\": \"The image to use
+      for the router\", \"name\": \"ROUTER_IMAGE\", \"value\": \"docker.io/lulf/router:sb4\"},
+      {\"description\": \"The link capacity setting for router\", \"name\": \"ROUTER_LINK_CAPACITY\",
+      \"value\": \"50\"}, {\"description\": \"A valid addressSpace name for the address
+      Space\", \"name\": \"ADDRESS_SPACE\", \"required\": true}, {\"description\":
+      \"A valid name for the deployment\", \"name\": \"NAME\", \"required\": true},
+      {\"description\": \"A valid group id for the deployment\", \"name\": \"CLUSTER_ID\",
+      \"required\": true}, {\"description\": \"The address to use for the queue\",
+      \"name\": \"ADDRESS\", \"value\": \"\"}, {\"description\": \"Name of secret
+      containing router key and certificate\", \"name\": \"COLOCATED_ROUTER_SECRET\",
+      \"required\": true}, {\"description\": \"The hostname of the authentication
+      service used by this address space\", \"name\": \"AUTHENTICATION_SERVICE_HOST\",
+      \"required\": true}, {\"description\": \"The port of the authentication service
+      used by this address space\", \"name\": \"AUTHENTICATION_SERVICE_PORT\", \"required\":
+      true}, {\"description\": \"The secret to use for validating authentication service
+      cert\", \"name\": \"AUTHENTICATION_SERVICE_CA_SECRET\", \"required\": true},
+      {\"description\": \"The client cert to use as identity against authentication
       service\", \"name\": \"AUTHENTICATION_SERVICE_CLIENT_SECRET\"}, {\"description\":
       \"The hostname to use in sasl init\", \"name\": \"AUTHENTICATION_SERVICE_SASL_INIT_HOST\"},
       {\"description\": \"Memory limits for container\", \"name\": \"BROKER_MEMORY_LIMIT\",
@@ -435,15 +436,15 @@ items:
       {\"emptyDir\": { }, \"name\": \"${NAME}\"}]}}}}], \"parameters\": [{\"description\":
       \"Storage capacity required for volume claims\", \"name\": \"STORAGE_CAPACITY\",
       \"value\": \"2Gi\"}, {\"description\": \"The container image to use for the
-      message broker\", \"name\": \"BROKER_IMAGE\", \"value\": \"docker.io/enmasseproject/artemis:0.18.0\"},
+      message broker\", \"name\": \"BROKER_IMAGE\", \"value\": \"docker.io/lulf/artemis:sb4\"},
       {\"description\": \"The default image to use as topic forwarder\", \"name\":
-      \"TOPIC_FORWARDER_IMAGE\", \"value\": \"docker.io/enmasseproject/topic-forwarder:0.18.0\"},
+      \"TOPIC_FORWARDER_IMAGE\", \"value\": \"docker.io/lulf/topic-forwarder:sb4\"},
       {\"description\": \"The image to use for the router\", \"name\": \"ROUTER_IMAGE\",
-      \"value\": \"docker.io/enmasseproject/router:0.18.0\"}, {\"description\": \"The
-      link capacity setting for router\", \"name\": \"ROUTER_LINK_CAPACITY\", \"value\":
-      \"50\"}, {\"description\": \"A valid addressSpace name for the address Space\",
-      \"name\": \"ADDRESS_SPACE\", \"required\": true}, {\"description\": \"A valid
-      name for the deployment\", \"name\": \"NAME\", \"required\": true}, {\"description\":
+      \"value\": \"docker.io/lulf/router:sb4\"}, {\"description\": \"The link capacity
+      setting for router\", \"name\": \"ROUTER_LINK_CAPACITY\", \"value\": \"50\"},
+      {\"description\": \"A valid addressSpace name for the address Space\", \"name\":
+      \"ADDRESS_SPACE\", \"required\": true}, {\"description\": \"A valid name for
+      the deployment\", \"name\": \"NAME\", \"required\": true}, {\"description\":
       \"A valid group id for the deployment\", \"name\": \"CLUSTER_ID\", \"required\":
       true}, {\"description\": \"The address to use for the topic\", \"name\": \"ADDRESS\",
       \"value\": \"\"}, {\"description\": \"Name of secret containing router key and
@@ -533,15 +534,15 @@ items:
       {\"storage\": \"${STORAGE_CAPACITY}\"}}}}]}}], \"parameters\": [{\"description\":
       \"Storage capacity required for volume claims\", \"name\": \"STORAGE_CAPACITY\",
       \"value\": \"2Gi\"}, {\"description\": \"The container image to use for the
-      message broker\", \"name\": \"BROKER_IMAGE\", \"value\": \"docker.io/enmasseproject/artemis:0.18.0\"},
+      message broker\", \"name\": \"BROKER_IMAGE\", \"value\": \"docker.io/lulf/artemis:sb4\"},
       {\"description\": \"The default image to use as topic forwarder\", \"name\":
-      \"TOPIC_FORWARDER_IMAGE\", \"value\": \"docker.io/enmasseproject/topic-forwarder:0.18.0\"},
+      \"TOPIC_FORWARDER_IMAGE\", \"value\": \"docker.io/lulf/topic-forwarder:sb4\"},
       {\"description\": \"The image to use for the router\", \"name\": \"ROUTER_IMAGE\",
-      \"value\": \"docker.io/enmasseproject/router:0.18.0\"}, {\"description\": \"The
-      link capacity setting for router\", \"name\": \"ROUTER_LINK_CAPACITY\", \"value\":
-      \"50\"}, {\"description\": \"A valid addressSpace name for the address Space\",
-      \"name\": \"ADDRESS_SPACE\", \"required\": true}, {\"description\": \"A valid
-      name for the deployment\", \"name\": \"NAME\", \"required\": true}, {\"description\":
+      \"value\": \"docker.io/lulf/router:sb4\"}, {\"description\": \"The link capacity
+      setting for router\", \"name\": \"ROUTER_LINK_CAPACITY\", \"value\": \"50\"},
+      {\"description\": \"A valid addressSpace name for the address Space\", \"name\":
+      \"ADDRESS_SPACE\", \"required\": true}, {\"description\": \"A valid name for
+      the deployment\", \"name\": \"NAME\", \"required\": true}, {\"description\":
       \"A valid group id for the deployment\", \"name\": \"CLUSTER_ID\", \"required\":
       true}, {\"description\": \"The address to use for the topic\", \"name\": \"ADDRESS\",
       \"value\": \"\"}, {\"description\": \"Name of secret containing router key and
@@ -560,52 +561,52 @@ items:
       \"GLOBAL_MAX_SIZE\", \"value\": \"128Mb\"}]}"}, "kind": "ConfigMap", "metadata":
       {"labels": {"app": "enmasse"}, "name": "enmasse-storage-templates"}}], "parameters":
       [{"description": "The image to use for the router", "name": "ROUTER_IMAGE",
-      "value": "docker.io/enmasseproject/router:0.18.0"}, {"description": "The image
-      to use for the router metrics collector", "name": "ROUTER_METRICS_IMAGE", "value":
-      "docker.io/enmasseproject/router-metrics:0.18.0"}, {"description": "The link
-      capacity setting for router", "name": "ROUTER_LINK_CAPACITY", "value": "50"},
-      {"description": "Whether AMQP based durable subscriptions to topics are allowed",
-      "name": "ALLOW_DURABLE_SUBSCRIPTIONS", "value": "true"}, {"description": "The
-      image to use for the configuration service", "name": "CONFIGSERV_IMAGE", "value":
-      "docker.io/enmasseproject/configserv:0.18.0"}, {"description": "The container
-      image to use for the queue scheduler", "name": "QUEUE_SCHEDULER_IMAGE", "value":
-      "docker.io/enmasseproject/queue-scheduler:0.18.0"}, {"description": "The container
-      image to use for the standard controller", "name": "STANDARD_CONTROLLER_IMAGE",
-      "value": "docker.io/enmasseproject/standard-controller:0.18.0"}, {"description":
-      "The image to use for the enmasse agent", "name": "AGENT_IMAGE", "value": "docker.io/enmasseproject/agent:0.18.0"},
-      {"description": "The hostname to use for the exposed route for messaging", "name":
-      "MESSAGING_HOSTNAME"}, {"description": "The image to use for the MQTT gateway",
-      "name": "MQTT_GATEWAY_IMAGE", "value": "docker.io/enmasseproject/mqtt-gateway:0.18.0"},
-      {"description": "The hostname to use for the exposed route for MQTT", "name":
-      "MQTT_GATEWAY_HOSTNAME"}, {"description": "The hostname to use for the exposed
-      route for the messaging console", "name": "CONSOLE_HOSTNAME"}, {"description":
-      "The secret with cert for the console", "name": "CONSOLE_SECRET", "required":
-      true}, {"description": "The secret with cert for the messaging service", "name":
-      "MESSAGING_SECRET", "required": true}, {"description": "The secret to mount
-      for MQTT private key and certificate", "name": "MQTT_SECRET", "required": true},
-      {"description": "The image to use for the MQTT LWT", "name": "MQTT_LWT_IMAGE",
-      "value": "docker.io/enmasseproject/mqtt-lwt:0.18.0"}, {"description": "The address
-      space this infrastructure is deployed for", "name": "ADDRESS_SPACE", "required":
-      true}, {"description": "The hostname of the authentication service used by this
-      address space", "name": "AUTHENTICATION_SERVICE_HOST", "required": true}, {"description":
-      "The port of the authentication service used by this address space", "name":
-      "AUTHENTICATION_SERVICE_PORT", "required": true}, {"description": "The CA cert
-      to use for validating authentication service cert", "name": "AUTHENTICATION_SERVICE_CA_CERT",
-      "required": true}, {"description": "The client cert to use as identity against
-      authentication service", "name": "AUTHENTICATION_SERVICE_CLIENT_SECRET"}, {"description":
-      "The hostname to use in sasl init", "name": "AUTHENTICATION_SERVICE_SASL_INIT_HOST"},
-      {"description": "The URL to use for OAUTH (if not set, OAUTH is not used)",
-      "name": "AUTHENTICATION_SERVICE_OAUTH_URL"}, {"description": "Enable logging
-      of kubernetes events", "name": "ENABLE_EVENT_LOGGER", "value": "false"}, {"description":
-      "Interval (in seconds) to use between controller resync", "name": "CONTROLLER_RESYNC_INTERVAL",
-      "value": "600"}, {"description": "Interval (in seconds) to use between status
-      checks", "name": "CONTROLLER_CHECK_INTERVAL", "value": "30"}, {"description":
-      "Max number of events queued up for controller", "name": "CONTROLLER_EVENT_QUEUE_SIZE",
-      "value": "10000"}, {"description": "The service account with address space admin
-      privileges", "name": "ADDRESS_SPACE_ADMIN_SA", "value": "address-space-admin"}]}'
+      "value": "docker.io/lulf/router:sb4"}, {"description": "The image to use for
+      the router metrics collector", "name": "ROUTER_METRICS_IMAGE", "value": "docker.io/lulf/router-metrics:sb4"},
+      {"description": "The link capacity setting for router", "name": "ROUTER_LINK_CAPACITY",
+      "value": "50"}, {"description": "Whether AMQP based durable subscriptions to
+      topics are allowed", "name": "ALLOW_DURABLE_SUBSCRIPTIONS", "value": "true"},
+      {"description": "The image to use for the configuration service", "name": "CONFIGSERV_IMAGE",
+      "value": "docker.io/lulf/configserv:sb4"}, {"description": "The container image
+      to use for the queue scheduler", "name": "QUEUE_SCHEDULER_IMAGE", "value": "docker.io/lulf/queue-scheduler:sb4"},
+      {"description": "The container image to use for the standard controller", "name":
+      "STANDARD_CONTROLLER_IMAGE", "value": "docker.io/lulf/standard-controller:sb4"},
+      {"description": "The image to use for the enmasse agent", "name": "AGENT_IMAGE",
+      "value": "docker.io/lulf/agent:sb4"}, {"description": "The hostname to use for
+      the exposed route for messaging", "name": "MESSAGING_HOSTNAME"}, {"description":
+      "The image to use for the MQTT gateway", "name": "MQTT_GATEWAY_IMAGE", "value":
+      "docker.io/lulf/mqtt-gateway:sb4"}, {"description": "The hostname to use for
+      the exposed route for MQTT", "name": "MQTT_GATEWAY_HOSTNAME"}, {"description":
+      "The hostname to use for the exposed route for the messaging console", "name":
+      "CONSOLE_HOSTNAME"}, {"description": "The secret with cert for the console",
+      "name": "CONSOLE_SECRET", "required": true}, {"description": "The secret with
+      cert for the messaging service", "name": "MESSAGING_SECRET", "required": true},
+      {"description": "The secret to mount for MQTT private key and certificate",
+      "name": "MQTT_SECRET", "required": true}, {"description": "The image to use
+      for the MQTT LWT", "name": "MQTT_LWT_IMAGE", "value": "docker.io/lulf/mqtt-lwt:sb4"},
+      {"description": "The address space this infrastructure is deployed for", "name":
+      "ADDRESS_SPACE", "required": true}, {"description": "The hostname of the authentication
+      service used by this address space", "name": "AUTHENTICATION_SERVICE_HOST",
+      "required": true}, {"description": "The port of the authentication service used
+      by this address space", "name": "AUTHENTICATION_SERVICE_PORT", "required": true},
+      {"description": "The CA cert to use for validating authentication service cert",
+      "name": "AUTHENTICATION_SERVICE_CA_CERT", "required": true}, {"description":
+      "The client cert to use as identity against authentication service", "name":
+      "AUTHENTICATION_SERVICE_CLIENT_SECRET"}, {"description": "The hostname to use
+      in sasl init", "name": "AUTHENTICATION_SERVICE_SASL_INIT_HOST"}, {"description":
+      "The URL to use for OAUTH (if not set, OAUTH is not used)", "name": "AUTHENTICATION_SERVICE_OAUTH_URL"},
+      {"description": "Enable logging of kubernetes events", "name": "ENABLE_EVENT_LOGGER",
+      "value": "false"}, {"description": "Interval (in seconds) to use between controller
+      resync", "name": "CONTROLLER_RESYNC_INTERVAL", "value": "600"}, {"description":
+      "Interval (in seconds) to use between status checks", "name": "CONTROLLER_CHECK_INTERVAL",
+      "value": "30"}, {"description": "Max number of events queued up for controller",
+      "name": "CONTROLLER_EVENT_QUEUE_SIZE", "value": "10000"}, {"description": "The
+      service account with address space admin privileges", "name": "ADDRESS_SPACE_ADMIN_SA",
+      "value": "address-space-admin"}]}'
     standard-space-infra.json: '{"apiVersion": "v1", "kind": "Template", "metadata":
       {"labels": {"app": "enmasse"}, "name": "standard-space-infra"}, "objects": [{"apiVersion":
       "v1", "kind": "Service", "metadata": {"annotations": {"addressSpace": "${ADDRESS_SPACE}",
+      "enmasse.io/service-port.amqp": 5672, "enmasse.io/service-port.amqps": 5671,
       "io.enmasse.endpointPort": "amqps", "service.alpha.openshift.io/dependencies":
       "[{\"kind\": \"Service\", \"name\": \"queue-scheduler\", \"namespace\": \"\"},
       {\"kind\": \"Service\", \"name\": \"configuration\", \"namespace\": \"\"}, {\"kind\":
@@ -764,25 +765,25 @@ items:
       { }, \"name\": \"${NAME}\"}]}}}}], \"parameters\": [{\"description\": \"Storage
       capacity required for volume claims\", \"name\": \"STORAGE_CAPACITY\", \"value\":
       \"2Gi\"}, {\"description\": \"The container image to use for the message broker\",
-      \"name\": \"BROKER_IMAGE\", \"value\": \"docker.io/enmasseproject/artemis:0.18.0\"},
-      {\"description\": \"The default image to use as topic forwarder\", \"name\":
-      \"TOPIC_FORWARDER_IMAGE\", \"value\": \"docker.io/enmasseproject/topic-forwarder:0.18.0\"},
-      {\"description\": \"The image to use for the router\", \"name\": \"ROUTER_IMAGE\",
-      \"value\": \"docker.io/enmasseproject/router:0.18.0\"}, {\"description\": \"The
-      link capacity setting for router\", \"name\": \"ROUTER_LINK_CAPACITY\", \"value\":
-      \"50\"}, {\"description\": \"A valid addressSpace name for the address Space\",
-      \"name\": \"ADDRESS_SPACE\", \"required\": true}, {\"description\": \"A valid
-      name for the deployment\", \"name\": \"NAME\", \"required\": true}, {\"description\":
-      \"A valid group id for the deployment\", \"name\": \"CLUSTER_ID\", \"required\":
-      true}, {\"description\": \"The address to use for the queue\", \"name\": \"ADDRESS\",
-      \"value\": \"\"}, {\"description\": \"Name of secret containing router key and
-      certificate\", \"name\": \"COLOCATED_ROUTER_SECRET\", \"required\": true}, {\"description\":
-      \"The hostname of the authentication service used by this address space\", \"name\":
-      \"AUTHENTICATION_SERVICE_HOST\", \"required\": true}, {\"description\": \"The
-      port of the authentication service used by this address space\", \"name\": \"AUTHENTICATION_SERVICE_PORT\",
-      \"required\": true}, {\"description\": \"The secret to use for validating authentication
-      service cert\", \"name\": \"AUTHENTICATION_SERVICE_CA_SECRET\", \"required\":
-      true}, {\"description\": \"The client cert to use as identity against authentication
+      \"name\": \"BROKER_IMAGE\", \"value\": \"docker.io/lulf/artemis:sb4\"}, {\"description\":
+      \"The default image to use as topic forwarder\", \"name\": \"TOPIC_FORWARDER_IMAGE\",
+      \"value\": \"docker.io/lulf/topic-forwarder:sb4\"}, {\"description\": \"The
+      image to use for the router\", \"name\": \"ROUTER_IMAGE\", \"value\": \"docker.io/lulf/router:sb4\"},
+      {\"description\": \"The link capacity setting for router\", \"name\": \"ROUTER_LINK_CAPACITY\",
+      \"value\": \"50\"}, {\"description\": \"A valid addressSpace name for the address
+      Space\", \"name\": \"ADDRESS_SPACE\", \"required\": true}, {\"description\":
+      \"A valid name for the deployment\", \"name\": \"NAME\", \"required\": true},
+      {\"description\": \"A valid group id for the deployment\", \"name\": \"CLUSTER_ID\",
+      \"required\": true}, {\"description\": \"The address to use for the queue\",
+      \"name\": \"ADDRESS\", \"value\": \"\"}, {\"description\": \"Name of secret
+      containing router key and certificate\", \"name\": \"COLOCATED_ROUTER_SECRET\",
+      \"required\": true}, {\"description\": \"The hostname of the authentication
+      service used by this address space\", \"name\": \"AUTHENTICATION_SERVICE_HOST\",
+      \"required\": true}, {\"description\": \"The port of the authentication service
+      used by this address space\", \"name\": \"AUTHENTICATION_SERVICE_PORT\", \"required\":
+      true}, {\"description\": \"The secret to use for validating authentication service
+      cert\", \"name\": \"AUTHENTICATION_SERVICE_CA_SECRET\", \"required\": true},
+      {\"description\": \"The client cert to use as identity against authentication
       service\", \"name\": \"AUTHENTICATION_SERVICE_CLIENT_SECRET\"}, {\"description\":
       \"The hostname to use in sasl init\", \"name\": \"AUTHENTICATION_SERVICE_SASL_INIT_HOST\"},
       {\"description\": \"Memory limits for container\", \"name\": \"BROKER_MEMORY_LIMIT\",
@@ -837,25 +838,25 @@ items:
       \"parameters\": [{\"description\": \"Storage capacity required for volume claims\",
       \"name\": \"STORAGE_CAPACITY\", \"value\": \"2Gi\"}, {\"description\": \"The
       container image to use for the message broker\", \"name\": \"BROKER_IMAGE\",
-      \"value\": \"docker.io/enmasseproject/artemis:0.18.0\"}, {\"description\": \"The
-      default image to use as topic forwarder\", \"name\": \"TOPIC_FORWARDER_IMAGE\",
-      \"value\": \"docker.io/enmasseproject/topic-forwarder:0.18.0\"}, {\"description\":
-      \"The image to use for the router\", \"name\": \"ROUTER_IMAGE\", \"value\":
-      \"docker.io/enmasseproject/router:0.18.0\"}, {\"description\": \"The link capacity
-      setting for router\", \"name\": \"ROUTER_LINK_CAPACITY\", \"value\": \"50\"},
-      {\"description\": \"A valid addressSpace name for the address Space\", \"name\":
-      \"ADDRESS_SPACE\", \"required\": true}, {\"description\": \"A valid name for
-      the deployment\", \"name\": \"NAME\", \"required\": true}, {\"description\":
-      \"A valid group id for the deployment\", \"name\": \"CLUSTER_ID\", \"required\":
-      true}, {\"description\": \"The address to use for the queue\", \"name\": \"ADDRESS\",
-      \"value\": \"\"}, {\"description\": \"Name of secret containing router key and
-      certificate\", \"name\": \"COLOCATED_ROUTER_SECRET\", \"required\": true}, {\"description\":
-      \"The hostname of the authentication service used by this address space\", \"name\":
-      \"AUTHENTICATION_SERVICE_HOST\", \"required\": true}, {\"description\": \"The
-      port of the authentication service used by this address space\", \"name\": \"AUTHENTICATION_SERVICE_PORT\",
-      \"required\": true}, {\"description\": \"The secret to use for validating authentication
-      service cert\", \"name\": \"AUTHENTICATION_SERVICE_CA_SECRET\", \"required\":
-      true}, {\"description\": \"The client cert to use as identity against authentication
+      \"value\": \"docker.io/lulf/artemis:sb4\"}, {\"description\": \"The default
+      image to use as topic forwarder\", \"name\": \"TOPIC_FORWARDER_IMAGE\", \"value\":
+      \"docker.io/lulf/topic-forwarder:sb4\"}, {\"description\": \"The image to use
+      for the router\", \"name\": \"ROUTER_IMAGE\", \"value\": \"docker.io/lulf/router:sb4\"},
+      {\"description\": \"The link capacity setting for router\", \"name\": \"ROUTER_LINK_CAPACITY\",
+      \"value\": \"50\"}, {\"description\": \"A valid addressSpace name for the address
+      Space\", \"name\": \"ADDRESS_SPACE\", \"required\": true}, {\"description\":
+      \"A valid name for the deployment\", \"name\": \"NAME\", \"required\": true},
+      {\"description\": \"A valid group id for the deployment\", \"name\": \"CLUSTER_ID\",
+      \"required\": true}, {\"description\": \"The address to use for the queue\",
+      \"name\": \"ADDRESS\", \"value\": \"\"}, {\"description\": \"Name of secret
+      containing router key and certificate\", \"name\": \"COLOCATED_ROUTER_SECRET\",
+      \"required\": true}, {\"description\": \"The hostname of the authentication
+      service used by this address space\", \"name\": \"AUTHENTICATION_SERVICE_HOST\",
+      \"required\": true}, {\"description\": \"The port of the authentication service
+      used by this address space\", \"name\": \"AUTHENTICATION_SERVICE_PORT\", \"required\":
+      true}, {\"description\": \"The secret to use for validating authentication service
+      cert\", \"name\": \"AUTHENTICATION_SERVICE_CA_SECRET\", \"required\": true},
+      {\"description\": \"The client cert to use as identity against authentication
       service\", \"name\": \"AUTHENTICATION_SERVICE_CLIENT_SECRET\"}, {\"description\":
       \"The hostname to use in sasl init\", \"name\": \"AUTHENTICATION_SERVICE_SASL_INIT_HOST\"},
       {\"description\": \"Memory limits for container\", \"name\": \"BROKER_MEMORY_LIMIT\",
@@ -931,15 +932,15 @@ items:
       {\"emptyDir\": { }, \"name\": \"${NAME}\"}]}}}}], \"parameters\": [{\"description\":
       \"Storage capacity required for volume claims\", \"name\": \"STORAGE_CAPACITY\",
       \"value\": \"2Gi\"}, {\"description\": \"The container image to use for the
-      message broker\", \"name\": \"BROKER_IMAGE\", \"value\": \"docker.io/enmasseproject/artemis:0.18.0\"},
+      message broker\", \"name\": \"BROKER_IMAGE\", \"value\": \"docker.io/lulf/artemis:sb4\"},
       {\"description\": \"The default image to use as topic forwarder\", \"name\":
-      \"TOPIC_FORWARDER_IMAGE\", \"value\": \"docker.io/enmasseproject/topic-forwarder:0.18.0\"},
+      \"TOPIC_FORWARDER_IMAGE\", \"value\": \"docker.io/lulf/topic-forwarder:sb4\"},
       {\"description\": \"The image to use for the router\", \"name\": \"ROUTER_IMAGE\",
-      \"value\": \"docker.io/enmasseproject/router:0.18.0\"}, {\"description\": \"The
-      link capacity setting for router\", \"name\": \"ROUTER_LINK_CAPACITY\", \"value\":
-      \"50\"}, {\"description\": \"A valid addressSpace name for the address Space\",
-      \"name\": \"ADDRESS_SPACE\", \"required\": true}, {\"description\": \"A valid
-      name for the deployment\", \"name\": \"NAME\", \"required\": true}, {\"description\":
+      \"value\": \"docker.io/lulf/router:sb4\"}, {\"description\": \"The link capacity
+      setting for router\", \"name\": \"ROUTER_LINK_CAPACITY\", \"value\": \"50\"},
+      {\"description\": \"A valid addressSpace name for the address Space\", \"name\":
+      \"ADDRESS_SPACE\", \"required\": true}, {\"description\": \"A valid name for
+      the deployment\", \"name\": \"NAME\", \"required\": true}, {\"description\":
       \"A valid group id for the deployment\", \"name\": \"CLUSTER_ID\", \"required\":
       true}, {\"description\": \"The address to use for the topic\", \"name\": \"ADDRESS\",
       \"value\": \"\"}, {\"description\": \"Name of secret containing router key and
@@ -1029,15 +1030,15 @@ items:
       {\"storage\": \"${STORAGE_CAPACITY}\"}}}}]}}], \"parameters\": [{\"description\":
       \"Storage capacity required for volume claims\", \"name\": \"STORAGE_CAPACITY\",
       \"value\": \"2Gi\"}, {\"description\": \"The container image to use for the
-      message broker\", \"name\": \"BROKER_IMAGE\", \"value\": \"docker.io/enmasseproject/artemis:0.18.0\"},
+      message broker\", \"name\": \"BROKER_IMAGE\", \"value\": \"docker.io/lulf/artemis:sb4\"},
       {\"description\": \"The default image to use as topic forwarder\", \"name\":
-      \"TOPIC_FORWARDER_IMAGE\", \"value\": \"docker.io/enmasseproject/topic-forwarder:0.18.0\"},
+      \"TOPIC_FORWARDER_IMAGE\", \"value\": \"docker.io/lulf/topic-forwarder:sb4\"},
       {\"description\": \"The image to use for the router\", \"name\": \"ROUTER_IMAGE\",
-      \"value\": \"docker.io/enmasseproject/router:0.18.0\"}, {\"description\": \"The
-      link capacity setting for router\", \"name\": \"ROUTER_LINK_CAPACITY\", \"value\":
-      \"50\"}, {\"description\": \"A valid addressSpace name for the address Space\",
-      \"name\": \"ADDRESS_SPACE\", \"required\": true}, {\"description\": \"A valid
-      name for the deployment\", \"name\": \"NAME\", \"required\": true}, {\"description\":
+      \"value\": \"docker.io/lulf/router:sb4\"}, {\"description\": \"The link capacity
+      setting for router\", \"name\": \"ROUTER_LINK_CAPACITY\", \"value\": \"50\"},
+      {\"description\": \"A valid addressSpace name for the address Space\", \"name\":
+      \"ADDRESS_SPACE\", \"required\": true}, {\"description\": \"A valid name for
+      the deployment\", \"name\": \"NAME\", \"required\": true}, {\"description\":
       \"A valid group id for the deployment\", \"name\": \"CLUSTER_ID\", \"required\":
       true}, {\"description\": \"The address to use for the topic\", \"name\": \"ADDRESS\",
       \"value\": \"\"}, {\"description\": \"Name of secret containing router key and
@@ -1067,11 +1068,12 @@ items:
       [{"mountPath": "/etc/enmasse-certs", "name": "subserv-internal-cert", "readOnly":
       true}]}], "volumes": [{"name": "subserv-internal-cert", "secret": {"secretName":
       "subserv-internal-cert"}}]}}}}, {"apiVersion": "v1", "kind": "Service", "metadata":
-      {"annotations": {"addressSpace": "${ADDRESS_SPACE}", "io.enmasse.endpointPort":
-      "secure-mqtt"}, "labels": {"app": "enmasse"}, "name": "mqtt"}, "spec": {"ports":
-      [{"name": "mqtt", "port": 1883, "protocol": "TCP", "targetPort": 1883}, {"name":
-      "secure-mqtt", "port": 8883, "protocol": "TCP", "targetPort": 8883}], "selector":
-      {"name": "mqtt-gateway"}, "type": "ClusterIP"}}, {"apiVersion": "extensions/v1beta1",
+      {"annotations": {"addressSpace": "${ADDRESS_SPACE}", "enmasse.io/service-port.mqtt":
+      1883, "enmasse.io/service-port.mqtts": 8883, "io.enmasse.endpointPort": "secure-mqtt"},
+      "labels": {"app": "enmasse"}, "name": "mqtt"}, "spec": {"ports": [{"name": "mqtt",
+      "port": 1883, "protocol": "TCP", "targetPort": 1883}, {"name": "secure-mqtt",
+      "port": 8883, "protocol": "TCP", "targetPort": 8883}], "selector": {"name":
+      "mqtt-gateway"}, "type": "ClusterIP"}}, {"apiVersion": "extensions/v1beta1",
       "kind": "Deployment", "metadata": {"annotations": {"addressSpace": "${ADDRESS_SPACE}"},
       "labels": {"app": "enmasse", "name": "mqtt-gateway"}, "name": "mqtt-gateway"},
       "spec": {"replicas": 1, "template": {"metadata": {"annotations": {"addressSpace":
@@ -1098,49 +1100,49 @@ items:
       "name": "mqtt-lwt", "volumeMounts": [{"mountPath": "/etc/enmasse-certs", "name":
       "mqtt-lwt-internal-cert", "readOnly": true}]}], "volumes": [{"name": "mqtt-lwt-internal-cert",
       "secret": {"secretName": "mqtt-lwt-internal-cert"}}]}}}}], "parameters": [{"description":
-      "The image to use for the router", "name": "ROUTER_IMAGE", "value": "docker.io/enmasseproject/router:0.18.0"},
+      "The image to use for the router", "name": "ROUTER_IMAGE", "value": "docker.io/lulf/router:sb4"},
       {"description": "The image to use for the router metrics collector", "name":
-      "ROUTER_METRICS_IMAGE", "value": "docker.io/enmasseproject/router-metrics:0.18.0"},
-      {"description": "The link capacity setting for router", "name": "ROUTER_LINK_CAPACITY",
-      "value": "50"}, {"description": "Whether AMQP based durable subscriptions to
-      topics are allowed", "name": "ALLOW_DURABLE_SUBSCRIPTIONS", "value": "true"},
-      {"description": "The image to use for the configuration service", "name": "CONFIGSERV_IMAGE",
-      "value": "docker.io/enmasseproject/configserv:0.18.0"}, {"description": "The
-      container image to use for the queue scheduler", "name": "QUEUE_SCHEDULER_IMAGE",
-      "value": "docker.io/enmasseproject/queue-scheduler:0.18.0"}, {"description":
-      "The container image to use for the standard controller", "name": "STANDARD_CONTROLLER_IMAGE",
-      "value": "docker.io/enmasseproject/standard-controller:0.18.0"}, {"description":
-      "The image to use for the enmasse agent", "name": "AGENT_IMAGE", "value": "docker.io/enmasseproject/agent:0.18.0"},
-      {"description": "The hostname to use for the exposed route for messaging", "name":
-      "MESSAGING_HOSTNAME"}, {"description": "The image to use for the MQTT gateway",
-      "name": "MQTT_GATEWAY_IMAGE", "value": "docker.io/enmasseproject/mqtt-gateway:0.18.0"},
-      {"description": "The hostname to use for the exposed route for MQTT", "name":
-      "MQTT_GATEWAY_HOSTNAME"}, {"description": "The hostname to use for the exposed
-      route for the messaging console", "name": "CONSOLE_HOSTNAME"}, {"description":
-      "The secret with cert for the console", "name": "CONSOLE_SECRET", "required":
-      true}, {"description": "The secret with cert for the messaging service", "name":
-      "MESSAGING_SECRET", "required": true}, {"description": "The secret to mount
-      for MQTT private key and certificate", "name": "MQTT_SECRET", "required": true},
-      {"description": "The image to use for the MQTT LWT", "name": "MQTT_LWT_IMAGE",
-      "value": "docker.io/enmasseproject/mqtt-lwt:0.18.0"}, {"description": "The address
-      space this infrastructure is deployed for", "name": "ADDRESS_SPACE", "required":
-      true}, {"description": "The hostname of the authentication service used by this
-      address space", "name": "AUTHENTICATION_SERVICE_HOST", "required": true}, {"description":
-      "The port of the authentication service used by this address space", "name":
-      "AUTHENTICATION_SERVICE_PORT", "required": true}, {"description": "The CA cert
-      to use for validating authentication service cert", "name": "AUTHENTICATION_SERVICE_CA_CERT",
-      "required": true}, {"description": "The client cert to use as identity against
-      authentication service", "name": "AUTHENTICATION_SERVICE_CLIENT_SECRET"}, {"description":
-      "The hostname to use in sasl init", "name": "AUTHENTICATION_SERVICE_SASL_INIT_HOST"},
-      {"description": "The URL to use for OAUTH (if not set, OAUTH is not used)",
-      "name": "AUTHENTICATION_SERVICE_OAUTH_URL"}, {"description": "Enable logging
-      of kubernetes events", "name": "ENABLE_EVENT_LOGGER", "value": "false"}, {"description":
-      "Interval (in seconds) to use between controller resync", "name": "CONTROLLER_RESYNC_INTERVAL",
-      "value": "600"}, {"description": "Interval (in seconds) to use between status
-      checks", "name": "CONTROLLER_CHECK_INTERVAL", "value": "30"}, {"description":
-      "Max number of events queued up for controller", "name": "CONTROLLER_EVENT_QUEUE_SIZE",
-      "value": "10000"}, {"description": "The service account with address space admin
-      privileges", "name": "ADDRESS_SPACE_ADMIN_SA", "value": "address-space-admin"}]}'
+      "ROUTER_METRICS_IMAGE", "value": "docker.io/lulf/router-metrics:sb4"}, {"description":
+      "The link capacity setting for router", "name": "ROUTER_LINK_CAPACITY", "value":
+      "50"}, {"description": "Whether AMQP based durable subscriptions to topics are
+      allowed", "name": "ALLOW_DURABLE_SUBSCRIPTIONS", "value": "true"}, {"description":
+      "The image to use for the configuration service", "name": "CONFIGSERV_IMAGE",
+      "value": "docker.io/lulf/configserv:sb4"}, {"description": "The container image
+      to use for the queue scheduler", "name": "QUEUE_SCHEDULER_IMAGE", "value": "docker.io/lulf/queue-scheduler:sb4"},
+      {"description": "The container image to use for the standard controller", "name":
+      "STANDARD_CONTROLLER_IMAGE", "value": "docker.io/lulf/standard-controller:sb4"},
+      {"description": "The image to use for the enmasse agent", "name": "AGENT_IMAGE",
+      "value": "docker.io/lulf/agent:sb4"}, {"description": "The hostname to use for
+      the exposed route for messaging", "name": "MESSAGING_HOSTNAME"}, {"description":
+      "The image to use for the MQTT gateway", "name": "MQTT_GATEWAY_IMAGE", "value":
+      "docker.io/lulf/mqtt-gateway:sb4"}, {"description": "The hostname to use for
+      the exposed route for MQTT", "name": "MQTT_GATEWAY_HOSTNAME"}, {"description":
+      "The hostname to use for the exposed route for the messaging console", "name":
+      "CONSOLE_HOSTNAME"}, {"description": "The secret with cert for the console",
+      "name": "CONSOLE_SECRET", "required": true}, {"description": "The secret with
+      cert for the messaging service", "name": "MESSAGING_SECRET", "required": true},
+      {"description": "The secret to mount for MQTT private key and certificate",
+      "name": "MQTT_SECRET", "required": true}, {"description": "The image to use
+      for the MQTT LWT", "name": "MQTT_LWT_IMAGE", "value": "docker.io/lulf/mqtt-lwt:sb4"},
+      {"description": "The address space this infrastructure is deployed for", "name":
+      "ADDRESS_SPACE", "required": true}, {"description": "The hostname of the authentication
+      service used by this address space", "name": "AUTHENTICATION_SERVICE_HOST",
+      "required": true}, {"description": "The port of the authentication service used
+      by this address space", "name": "AUTHENTICATION_SERVICE_PORT", "required": true},
+      {"description": "The CA cert to use for validating authentication service cert",
+      "name": "AUTHENTICATION_SERVICE_CA_CERT", "required": true}, {"description":
+      "The client cert to use as identity against authentication service", "name":
+      "AUTHENTICATION_SERVICE_CLIENT_SECRET"}, {"description": "The hostname to use
+      in sasl init", "name": "AUTHENTICATION_SERVICE_SASL_INIT_HOST"}, {"description":
+      "The URL to use for OAUTH (if not set, OAUTH is not used)", "name": "AUTHENTICATION_SERVICE_OAUTH_URL"},
+      {"description": "Enable logging of kubernetes events", "name": "ENABLE_EVENT_LOGGER",
+      "value": "false"}, {"description": "Interval (in seconds) to use between controller
+      resync", "name": "CONTROLLER_RESYNC_INTERVAL", "value": "600"}, {"description":
+      "Interval (in seconds) to use between status checks", "name": "CONTROLLER_CHECK_INTERVAL",
+      "value": "30"}, {"description": "Max number of events queued up for controller",
+      "name": "CONTROLLER_EVENT_QUEUE_SIZE", "value": "10000"}, {"description": "The
+      service account with address space admin privileges", "name": "ADDRESS_SPACE_ADMIN_SA",
+      "value": "address-space-admin"}]}'
   kind: ConfigMap
   metadata:
     labels:
@@ -1187,7 +1189,7 @@ items:
             value: '600'
           - name: CHECK_INTERVAL
             value: '30'
-          image: docker.io/enmasseproject/address-controller:0.18.0
+          image: docker.io/lulf/address-controller:sb4
           livenessProbe:
             httpGet:
               path: /apis/enmasse.io/v1/health
