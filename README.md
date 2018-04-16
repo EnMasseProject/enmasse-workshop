@@ -284,30 +284,15 @@ The console application can be configured using a `device.properties` file which
 
 #### Getting TLS certificates
 
-Connections to EnMasse running on OpenShift are possible only through TLS protocol. In order to have such connections working, we need to get the server certificate that the device has to use for establishing the TLS connection. The certificate for the AMQP endpoint can be downloaded through the messaging console. If you are using the standard address space with MQTT, you need to download the cert from the endpoint for now. In a production environment, it is likely that the cluster will be set up with trusted certificates.
+Connections to EnMasse running on OpenShift externally are possible only through TLS protocol. In order to have such connections working, we first need to create a binding for devices to use. Depending on your preferences, you can create a per-device binding with restrictions on addresses, or one binding for all devices. In any case, you need to enable the `externalAccess` attribute when creating the binding, so that you get the external access endpoints to use for devices.
 
-For simplicity, the tutorial downloads the certificates from the endpoint.
+When you view the secret for the binding, you should see an `externalMessagingHost` and `externalMqttHost` (AMQP and MQTT) with corresponding port entries. You should use these values for the `service.hostname` and `service.port` in the device configuration.
 
-```
-mkdir amqp-certs
-mkdir mqtt-certs
-```
+The `username` and `password` fields should go into `device.username` and `device.password` in the device config.
 
-For AMQP based devices, the command is the following :
+The `messagingCert` and `mqttCert` fields contains the certificates needed by the AMQP and MQTT clients respectively.
 
-```
-oc extract secret/external-certs-messaging --to=amqp-certs -n $NAMESPACE
-```
-
-In the same way, for MQTT based devices, the command is the following :
-
-```
-oc extract secret/external-certs-mqtt --to=mqtt-certs -n $NAMESPACE
-```
-
-Both commands extract the certificate `server-cert.pem` file. The file path needs to be set as value for the device configuration property _device.transport.ssl.servercert_.
-
-Other than that, be sure that _service.hostname_ property is set to the messaging (for AMQP devices) or mqtt (for MQTT devices) route. At same time the _service.port_ property needs to be set to 443.
+Save the certificates to a local file (`messagingCert.pem` and `mqttCert.pem` for instance) and change the `device.transport.ssl.servercert` field in the device configuration to point to this file.
 
 #### Using Maven
 
