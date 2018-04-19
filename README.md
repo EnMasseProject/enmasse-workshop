@@ -33,11 +33,17 @@ If you don't have an OpenShift cluster available, you can use [minishift](https:
 
 ### Starting minishift
 
-For this workshop, you need at least 4GB of RAM for your minishift instance since we're running both EnMasse and
-Spark on a local OpenShift cluster.
+For this workshop, we are going to use the Service Catalog which is part of the experimental features group at time of writing and for this reason needs to be explicitly enabled.
 
 ```
-minishift start --cpus 2 --memory 4096
+export MINISHIFT_ENABLE_EXPERIMENTAL=y
+```
+
+In this wat, the `--service-catalog` flag can be used on starting minishift in order to enable the Service Catalog.
+Then you need at least 4GB of RAM for your minishift instance since we're running both EnMasse and Spark on a local OpenShift cluster.
+
+```
+minishift start --cpus 2 --memory 4096 --service-catalog true
 ```
 
 Once this command completes, the OpenShift cluster should be ready to use.
