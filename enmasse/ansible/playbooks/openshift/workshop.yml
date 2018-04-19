@@ -1,6 +1,6 @@
 - hosts: localhost
   vars:
-    namespace: enmasse
+    namespace: enmasse-workshop
     multitenant: true
     enable_rbac: "true"
     admin_user: developer
