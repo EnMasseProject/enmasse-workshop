@@ -42,6 +42,14 @@ minishift start --cpus 2 --memory 4096
 
 Once this command completes, the OpenShift cluster should be ready to use.
 
+In order to run the Ansible playbook used for deploying EnMasse, the logged user needs admin rights. It should be satisfied by the cluster administrator but using minishift it's not true from the beginning. For this reason, it's needed to assign `cluster-admin` rights to the user (i.e. "developer").
+
+```
+oc login -u system:admin
+oc adm policy add-cluster-role-to-user cluster-admin developer
+oc login -u developer -p developer
+```
+
 ### Exploring the console
 
 Take a few minutes to familiarize yourself with the OpenShift console. If you use minishift, you can run `minishift dashboard` which will open a window in your web browser. With minishift, you can login with username <b>developer</b> and password <b>developer</b>.
@@ -88,7 +96,7 @@ This workshop will use the following [playbook](enmasse/ansible/playbooks/opensh
     - enmasse
 ```
 
-This playbook instructs ansible to install EnMasse to the `enmasse-workshop` namespace in OpenShift.  We will use the service catalog integration to make it easy to provision the messaging service. We will also use ([keycloak](www.keycloak.org)) for authentication. If your OpenShift cluster is on a public network, please change the `keycloak_admin_password` to what you prefer.
+This playbook instructs Ansible to install EnMasse to the `enmasse-workshop` namespace in OpenShift.  We will use the service catalog integration to make it easy to provision the messaging service. We will also use [Keycloak](www.keycloak.org) for authentication. If your OpenShift cluster is on a public network, please change the `keycloak_admin_password` to what you prefer.
 
 You can modify the settings to your liking, but the rest of the workshop will assume the above being set.
 
