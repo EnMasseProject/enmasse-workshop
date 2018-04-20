@@ -155,7 +155,7 @@ In the OpenShift Service Catalog overview, select either of "EnMasse (standard)"
 
 Select among the available plans. Select the "Create Project" in the drop-down box.
 
-Use the same value for the "name" field. The address space will be provisioned and may take a few
+Use the same value for the "name" and the "Project Name" fields. The address space will be provisioned and may take a few
 minutes.
 
 ![Provision](images/provision2.png)
@@ -198,9 +198,11 @@ In the 'standard' address space, we have 4 types of addresses.
 
 ### Creating addresses for this workshop
 
-Login to the messaging console URL given by the provisioned service. You should be redirected to the
-authentication service. On the side of the login form, you can see a button named "OpenShift".
-Click on that to authenticate your user using your OpenShift credentials.
+Login to the messaging console URL given by the provisioned service. You should be redirected to the authentication service. 
+
+![Authentication service](images/auth_service.png)
+
+On the side of the login form, you can see a button named "OpenShift". Click on that to authenticate your user using your OpenShift credentials.
 
 Once logged in, create the following addresses:
 
@@ -214,9 +216,15 @@ In this workshop we aim to setup a secure-by-default IoT solution, so we need to
 applications and what addresses they need to access. Before we create the bindings we need, lets
 define the mapping:
 
-* deviceX - send: temperature, recv: control/deviceX
-* spark-driver - recv: temperature, send: max
-* thermostat - recv: max, send: control*
+* _deviceX_ :
+  * recv: control/deviceX
+  * send: temperature
+* _spark-driver_ : 
+  * recv: temperature
+  * send: max
+* _thermostat_ :
+  * recv: max
+  * send: control
 
 We will create the bindings to each of the application as we deploy them.
 
