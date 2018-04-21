@@ -125,10 +125,10 @@ An official support for Apache Spark on OpenShift is provided by the [radanalyti
 the Oshinko application with a Web UI for deploying a Spark cluster. Other than using such a Web UI, a CLI tool is available as well which is used for this workshop.
 
 Go to [Oshinko CLI downloads](https://github.com/radanalyticsio/oshinko-cli/releases) and download
-the latest release (0.3.1 as of time of writing). Unpack the release:
+the latest release (0.4.6 as of time of writing). Unpack the release:
 
 ```
-tar xvf oshinko_v0.3.1_linux_amd64.tar.gz
+tar xvf oshinko_v0.4.6_linux_amd64.tar.gz
 ```
 
 Then use the following command in order to deploy a Spark cluster made by one master node and one slave node.
@@ -309,7 +309,8 @@ The console application can be configured using a `device.properties` file which
 
 Connections to EnMasse running on OpenShift externally are possible only through TLS protocol. In order to have such connections working, we first need to create a binding for devices to use. Depending on your preferences, you can create a per-device binding with restrictions on addresses, or one binding for all devices. In any case, you need to enable the `externalAccess` attribute when creating the binding, so that you get the external access endpoints to use for devices.
 
-When you view the secret for the binding, you should see an `externalMessagingHost` and `externalMqttHost` (AMQP and MQTT) with corresponding port entries. You should use these values for the `service.hostname` and `service.port` in the device configuration.
+When you view the secret for the binding, you should see an `externalMessagingHost` and `externalMqttHost` (AMQP and MQTT) with corresponding port entries `externalMessagingPort` and `externalMqttPort`.
+You should use these values for the `service.hostname` and `service.port` in the device configuration.
 
 The `username` and `password` fields should go into `device.username` and `device.password` in the device config.
 
