@@ -241,7 +241,8 @@ oc project myapp
 To deploy the spark driver:
 
 ```
-mvn clean package fabric8:resource fabric8:build fabric8:deploy -Dspark.master.host=myspark.spark.svc -Dspark.app=myapp
+cd iot/spark-driver
+mvn clean package fabric8:resource fabric8:build fabric8:deploy -Dspark.master.host=${SPARK_NAME}.spark.svc -Dspark.app=myapp
 ```
 
 This command will package the application and build a Docker image deployed to OpenShift.
