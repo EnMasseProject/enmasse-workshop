@@ -67,8 +67,8 @@ public class AppCredentials {
     }
 
     public static AppCredentials fromSystem() throws Exception {
-        String hostname = readSecretFile("host");
-        int port = Integer.parseInt(readSecretFile("port"));
+        String hostname = readSecretFile("messagingHost");
+        int port = Integer.parseInt(readSecretFile("messagingAmqpPort"));
         String username = readSecretFile("username");
         String password = readSecretFile("password");
         File x509CertificateFile = new File(SECRETS_PATH, "certificate.pem");
@@ -115,8 +115,8 @@ public class AppCredentials {
             trustStore = createTrustStore(cert);
         }
         return new AppCredentials(
-                properties.getProperty("hostname"),
-                Integer.parseInt(properties.getProperty("port")),
+                properties.getProperty("messagingHost"),
+                Integer.parseInt(properties.getProperty("messagingAmqpPort")),
                 properties.getProperty("username"),
                 properties.getProperty("password"),
                 cert,
