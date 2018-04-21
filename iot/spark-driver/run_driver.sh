@@ -12,18 +12,18 @@ if [ -z "$MESSAGING_SERVICE_HOST" ] || [ -z "$MESSAGING_SERVICE_PORT" ] || [ -z 
     CRED_DIR="/etc/app-credentials"
     echo "Looking for messaging info through $CRED_DIR"
 
-    if [ -f "$CRED_DIR/host" ]; then
-        export MESSAGING_SERVICE_HOST=`cat $CRED_DIR/host`
+    if [ -f "$CRED_DIR/messagingHost" ]; then
+        export MESSAGING_SERVICE_HOST=`cat $CRED_DIR/messagingHost`
     else
-        echo "Missing $CRED_DIR/host"
+        echo "Missing $CRED_DIR/messagingHost"
     fi
 
-    if [ -f "$CRED_DIR/port" ]; then
+    if [ -f "$CRED_DIR/messagingAmqpPort" ]; then
         # TODO: TLS support
-        #export MESSAGING_SERVICE_PORT=`cat $CRED_DIR/port`
+        #export MESSAGING_SERVICE_PORT=`cat $CRED_DIR/messagingAmqpPort`
         echo "Using default port"
     else
-        echo "Missing $CRED_DIR/port"
+        echo "Missing $CRED_DIR/messagingAmqpPort"
     fi
 
     if [ -f "$CRED_DIR/username" ]; then
