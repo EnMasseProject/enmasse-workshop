@@ -262,17 +262,11 @@ The spark-driver will now redeploy and read the credentials from the binding.
 
 The thermostat application uses the [fabric8-maven-plugin](https://github.com/fabric8io/fabric8-maven-plugin) to create a docker image, an OpenShift deployment config, and deploy the thermostat into OpenShift.
 
-To build the application and a docker image:
+To build the application as a Docker image and deploy it to the OpenShift cluster:
 
 ```
 cd iot/thermostat
-mvn -Dfabric8.mode=openshift package fabric8:build
-```
-
-To deploy the image to the OpenShift cluster
-
-```
-mvn fabric8:resource fabric8:deploy
+mvn package fabric8:resource fabric8:build fabric8:deploy -Dfabric8.mode=openshift
 ```
 
 The thermostat will be deployed to the OpenShift cluster. The pod will be named `thermostat-$number` where `$number` is incremented each time you run the deploy command.
