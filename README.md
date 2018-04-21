@@ -232,6 +232,12 @@ We will create the bindings to each of the application as we deploy them.
 
 The `spark-driver` directory provides the Spark Streaming driver application and a Docker image for running the related Spark driver inside the cluster. The spark-driver is deployed by building and running it on the OpenShift cluster.  The spark-driver uses the [fabric8-maven-plugin](https://github.com/fabric8io/fabric8-maven-plugin) to create a docker image, an OpenShift deployment config, and deploy the spark-driver into OpenShift.
 
+First of all be sure to have the created application project as active:
+
+```
+oc project myapp
+```
+
 To deploy the spark driver:
 
 ```
@@ -254,12 +260,6 @@ The spark-driver will now redeploy and read the credentials from the binding.
 ### Deploying the "Thermostat" application
 
 The thermostat application uses the [fabric8-maven-plugin](https://github.com/fabric8io/fabric8-maven-plugin) to create a docker image, an OpenShift deployment config, and deploy the thermostat into OpenShift.
-
-First of all be sure to have the created application project as active:
-
-```
-oc project myapp
-```
 
 To build the application and a docker image:
 
