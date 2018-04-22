@@ -20,8 +20,7 @@ if [ -z "$MESSAGING_SERVICE_HOST" ] || [ -z "$MESSAGING_SERVICE_PORT" ] || [ -z 
 
     if [ -f "$CRED_DIR/messagingAmqpPort" ]; then
         # TODO: TLS support
-        #export MESSAGING_SERVICE_PORT=`cat $CRED_DIR/messagingAmqpPort`
-        echo "Using default port"
+        export MESSAGING_SERVICE_PORT=`cat $CRED_DIR/messagingAmqpPort`
     else
         echo "Missing $CRED_DIR/messagingAmqpPort"
     fi
