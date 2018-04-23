@@ -18,7 +18,7 @@ items:
         - env:
           - name: LISTENPORT
             value: '5671'
-          image: docker.io/lulf/none-authservice:sb4
+          image: docker.io/enmasseproject/none-authservice:0.19.0
           livenessProbe:
             initialDelaySeconds: 60
             tcpSocket:

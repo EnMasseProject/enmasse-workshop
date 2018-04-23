@@ -46,7 +46,7 @@ spec:
             secretKeyRef:
               key: tls.crt
               name: keycloak-cert
-        image: docker.io/lulf/keycloak-controller:sb4
+        image: docker.io/enmasseproject/keycloak-controller:0.19.0
         name: keycloak-controller
         resources:
           limits:

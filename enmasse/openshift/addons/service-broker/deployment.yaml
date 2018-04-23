@@ -20,24 +20,29 @@ spec:
         - name: ENABLE_RBAC
           valueFrom:
             configMapKeyRef:
-              key: enable_rbac
+              key: enableRbac
               name: service-broker-config
         - name: KEYCLOAK_URL
           valueFrom:
             configMapKeyRef:
-              key: httpUrl
+              key: keycloakUrl
+              name: service-broker-config
+        - name: CONSOLE_PREFIX
+          valueFrom:
+            configMapKeyRef:
+              key: consolePrefix
               name: service-broker-config
         - name: KEYCLOAK_CA
           valueFrom:
             secretKeyRef:
-              key: keycloak-ca.crt
+              key: keycloakCa.crt
               name: service-broker-secret
-        - name: KEYCLOAK_USER
+        - name: KEYCLOAK_ADMIN_USER
           valueFrom:
             secretKeyRef:
               key: keycloak.username
               name: service-broker-secret
-        - name: KEYCLOAK_PASSWORD
+        - name: KEYCLOAK_ADMIN_PASSWORD
           valueFrom:
             secretKeyRef:
               key: keycloak.password
@@ -46,21 +51,21 @@ spec:
           value: /service-broker-cert
         - name: LISTEN_PORT
           value: '8443'
-        image: docker.io/enmasseproject/service-broker:latest
+        image: docker.io/enmasseproject/service-broker:0.19.0
         livenessProbe:
           httpGet:
             path: /healthz
-            ports: https
+            port: https
             scheme: HTTPS
         name: service-broker
         ports:
-        - containerPort: '8443'
+        - containerPort: 8443
           name: https
         volumeMounts:
         - mountPath: /service-broker-cert
           name: service-broker-cert
           readOnly: true
-      serviceAccount: enmasse-service-broker
+      serviceAccount: enmasse-admin
       volumes:
       - name: service-broker-cert
         secret:

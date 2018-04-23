@@ -58,7 +58,7 @@ objects:
 parameters:
 - description: The container image to use for the 'none' auth service
   name: NONE_AUTHSERVICE_IMAGE
-  value: docker.io/lulf/none-authservice:sb4
+  value: docker.io/enmasseproject/none-authservice:0.19.0
 - description: The secret to use for the none-authservice certificate
   name: NONE_AUTHSERVICE_CERT_SECRET_NAME
   value: none-authservice-cert
