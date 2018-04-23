@@ -88,6 +88,7 @@ public class TemperatureAnalyzer {
     private static JavaStreamingContext createStreamingContext() {
 
         SparkConf conf = new SparkConf().setAppName(APP_NAME);
+        log.info("appName = {}", APP_NAME);
         //conf.setMaster("local[2]");
         conf.set("spark.streaming.receiver.writeAheadLog.enable", "true");
 
