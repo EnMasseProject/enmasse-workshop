@@ -168,8 +168,13 @@ If you go to your project, you should see the service provisioning in progress.
 
 ![MyApp](images/myapp1.png)
 
-Once the provisioning is complete, we can login to the console and create the addresses we need for
-the workshop.
+Once the provisioning is complete, first of all be sure to have the created application project as active:
+
+```
+oc project myapp
+```
+
+Then we can login to the console and create the addresses we need for the workshop.
 
 ### Creating messaging addresses
 
@@ -231,12 +236,6 @@ We will create the bindings to each of the application as we deploy them.
 ### Deploying the "Temperature Analyzer" Spark driver
 
 The `spark-driver` directory provides the Spark Streaming driver application and a Docker image for running the related Spark driver inside the cluster. The spark-driver is deployed by building and running it on the OpenShift cluster.  The spark-driver uses the [fabric8-maven-plugin](https://github.com/fabric8io/fabric8-maven-plugin) to create a docker image, an OpenShift deployment config, and deploy the spark-driver into OpenShift.
-
-First of all be sure to have the created application project as active:
-
-```
-oc project myapp
-```
 
 To deploy the spark driver:
 
