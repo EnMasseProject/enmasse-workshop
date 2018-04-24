@@ -19,9 +19,9 @@
       <version>${spark-streaming.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.spark</groupId>
+      <groupId>io.radanalytics</groupId>
       <artifactId>spark-streaming-amqp_2.11</artifactId>
-      <version>0.2.0</version>
+      <version>0.3.1</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
@@ -35,13 +35,6 @@
     <spark.master.port>7077</spark.master.port>
     <spark.app>myapp</spark.app>
   </properties>
-
-  <repositories>
-    <repository>
-      <id>local-repo</id>
-      <url>file://${project.basedir}/src/main/local-repo</url>
-    </repository>
-  </repositories>
 
   <build>
     <plugins>
