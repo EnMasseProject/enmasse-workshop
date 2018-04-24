@@ -1,11 +1,11 @@
 - hosts: localhost
   vars:
-    namespace: enmasse-workshop
+    namespace: enmasse-system
     multitenant: true
-    enable_rbac: "true"
-    admin_user: developer
+    enable_rbac: true
     service_catalog: true
-    keycloak_admin_password: admin
+    keycloak_admin_password: 
+    keycloak_http_url: 
     authentication_services:
       - standard
   roles:
