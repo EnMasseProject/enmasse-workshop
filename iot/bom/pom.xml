@@ -15,18 +15,10 @@
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
-    <vertx.version>3.5.0-SNAPSHOT</vertx.version>
-    <spark-streaming.version>2.0.0</spark-streaming.version>
+    <vertx.version>3.5.1</vertx.version>
+    <spark-streaming.version>2.3.0</spark-streaming.version>
     <slf4j.version>1.7.24</slf4j.version>
   </properties>
-
-  <repositories>
-    <repository>
-      <id>oss-sonatype</id>
-      <name>oss-sonatype</name>
-      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-    </repository>
-  </repositories>
 
 </project>
 
