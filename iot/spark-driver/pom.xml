@@ -74,7 +74,7 @@
               <name>spark-driver:${project.version}</name>
               <alias>spark-driver</alias>
               <build>
-                <from>radanalyticsio/openshift-spark:2.2-latest</from>
+                <from>radanalyticsio/openshift-spark:2.3.0-1</from>
                 <cmd>
                   <exec>
                     <arg>/run_driver.sh</arg>
