@@ -49,35 +49,23 @@ public class TemperatureAnalyzer {
 
     private static final Logger log = LoggerFactory.getLogger(TemperatureAnalyzer.class);
 
-    private static final String APP_NAME = System.getenv("SPARK_APP"); //"TemperatureAnalyzer";
+    private static final String APP_NAME = "TemperatureAnalyzer";
     private static final Duration BATCH_DURATION = new Duration(1000);
 
     private static final String CHECKPOINT_DIR = "/tmp/spark-streaming-amqp";
 
-    private static String host = "localhost";
-    private static int port = 5672;
-    private static String username = null;
-    private static String password = null;
+    private static AppCredentials appCredentials = null;
     private static String temperatureAddress = "temperature";
     private static String maxAddress = "max";
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws Exception {
 
-        // getting AMQP messaging service connection information
-        String messagingServiceHost = System.getenv("MESSAGING_SERVICE_HOST");
-        if (messagingServiceHost != null) {
-            host = messagingServiceHost;
-        }
-        String messagingServicePort = System.getenv("MESSAGING_SERVICE_PORT");
-        if (messagingServicePort != null) {
-            port = Integer.valueOf(messagingServicePort);
-        }
-        log.info("AMQP messaging service hostname {}:{}", host, port);
+        appCredentials = AppCredentials.fromSystem();
+
+        log.info("AMQP messaging service hostname {}:{}", appCredentials.getHostname(), appCredentials.getPort());
 
         // getting credentials for authentication
-        username = System.getenv("MESSAGING_USERNAME");
-        password = System.getenv("MESSAGING_PASSWORD");
-        log.info("Credentials {}/{}", username, password);
+        log.info("Credentials {}/{}", appCredentials.getUsername(), appCredentials.getPassword());
 
         JavaStreamingContext ssc = JavaStreamingContext.getOrCreate(CHECKPOINT_DIR, TemperatureAnalyzer::createStreamingContext);
 
@@ -96,8 +84,8 @@ public class TemperatureAnalyzer {
         ssc.checkpoint(CHECKPOINT_DIR);
 
         JavaReceiverInputDStream<DeviceTemperature> receiveStream =
-                AMQPUtils.createStream(ssc, host, port,
-                        Option.apply(username), Option.apply(password), temperatureAddress,
+                AMQPUtils.createStream(ssc, appCredentials.getHostname(), appCredentials.getPort(),
+                        Option.apply(appCredentials.getUsername()), Option.apply(appCredentials.getPassword()), temperatureAddress,
                         message -> {
 
                             Section section = message.getBody();
@@ -133,10 +121,10 @@ public class TemperatureAnalyzer {
 
         //max.print();
 
-        Broadcast<String> messagingHost = ssc.sparkContext().broadcast(host);
-        Broadcast<Integer> messagingPort = ssc.sparkContext().broadcast(port);
-        Broadcast<String> driverUsername = ssc.sparkContext().broadcast(username);
-        Broadcast<String> driverPassword = ssc.sparkContext().broadcast(password);
+        Broadcast<String> messagingHost = ssc.sparkContext().broadcast(appCredentials.getHostname());
+        Broadcast<Integer> messagingPort = ssc.sparkContext().broadcast(appCredentials.getPort());
+        Broadcast<String> driverUsername = ssc.sparkContext().broadcast(appCredentials.getUsername());
+        Broadcast<String> driverPassword = ssc.sparkContext().broadcast(appCredentials.getPassword());
 
         max.foreachRDD(rdd -> {
 
