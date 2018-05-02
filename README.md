@@ -217,7 +217,7 @@ The `spark-driver` directory provides the Spark Streaming driver application and
 
 ```
 cd iot/spark-driver
-oc process -f ../../oshinko/driver-template.json GIT_REPO=https://github.com/EnMasseProject/enmasse-workshop.git | oc create -f -
+oc process -f ../../oshinko/driver-template.json GIT_URI=https://github.com/EnMasseProject/enmasse-workshop.git | oc create -f -
 ```
 
 This command will create a Spark cluster on-demand and deploy the driver application to it. To make modifications to the driver, fork this repository, edit the source and push the changes to your own repo. Then you can change the above template parameter to point to your repo.
