@@ -399,12 +399,12 @@ Capture the values for the `externalMessagingHost` and `externalMessagingPort` a
 Store the value of the `messagingCert.pem` field in a local file and update the
 `device.transport.ssl.servercert` field in `iot/clients/src/main/resources/device-amqp.properties`.  The `messagingCert` and `mqttCert` fields contains the certificates needed by the AMQP and MQTT clients respectively.
 
-![Device4](images/device4.png)
+![Device5](images/device5.png)
 
 Finally, copy the values for the `username` and `password` into `device.username` and
 `device.password` in the device properties file.
 
-![Device5](images/device5.png)
+![Device6](images/device6.png)
 
 An example final configuration:
 
@@ -438,7 +438,7 @@ The console application needs only one argument which is the path to the `device
 
 Example output:
 
-![Device6](images/device6.png)
+![Device7](images/device7.png)
 
 #### Run device using Maven
 
