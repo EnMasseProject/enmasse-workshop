@@ -440,6 +440,10 @@ Example output:
 
 ![Device7](images/device7.png)
 
+If you go to your messaging console, you should see the different clients connected sending messages:
+
+![Device8](images/device8.png)
+
 #### Run device using Maven
 
 In order to run the `HeatingDevice` application you can use the Maven `exec` plugin with the following command from the `clients` directory.
