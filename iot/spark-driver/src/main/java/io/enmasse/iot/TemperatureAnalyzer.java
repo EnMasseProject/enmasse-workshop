@@ -49,7 +49,7 @@ public class TemperatureAnalyzer {
 
     private static final Logger log = LoggerFactory.getLogger(TemperatureAnalyzer.class);
 
-    private static final String APP_NAME = System.getenv("SPARK_APP"); //"TemperatureAnalyzer";
+    private static final String APP_NAME = "TemperatureAnalyzer";
     private static final Duration BATCH_DURATION = new Duration(1000);
 
     private static final String CHECKPOINT_DIR = "/tmp/spark-streaming-amqp";
@@ -82,7 +82,9 @@ public class TemperatureAnalyzer {
         JavaStreamingContext ssc = JavaStreamingContext.getOrCreate(CHECKPOINT_DIR, TemperatureAnalyzer::createStreamingContext);
 
         ssc.start();
+        log.info("Started");
         ssc.awaitTermination();
+        log.warn("Terminated!!");
     }
 
     private static JavaStreamingContext createStreamingContext() {
@@ -99,6 +101,7 @@ public class TemperatureAnalyzer {
                 AMQPUtils.createStream(ssc, host, port,
                         Option.apply(username), Option.apply(password), temperatureAddress,
                         message -> {
+                            log.info("Got message from sensor ");
 
                             Section section = message.getBody();
                             if (section instanceof AmqpValue) {

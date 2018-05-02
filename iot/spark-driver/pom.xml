@@ -33,7 +33,6 @@
   <properties>
     <spark.master.host>localhost</spark.master.host>
     <spark.master.port>7077</spark.master.port>
-    <spark.app>myapp</spark.app>
   </properties>
 
   <build>
@@ -74,7 +73,7 @@
               <name>spark-driver:${project.version}</name>
               <alias>spark-driver</alias>
               <build>
-                <from>radanalyticsio/openshift-spark:2.3.0-1</from>
+                <from>radanalyticsio/openshift-spark:2.2.1-4</from>
                 <cmd>
                   <exec>
                     <arg>/run_driver.sh</arg>
@@ -83,7 +82,6 @@
                 <env>
                   <SPARK_MASTER_HOST>${spark.master.host}</SPARK_MASTER_HOST>
                   <SPARK_MASTER_PORT>${spark.master.port}</SPARK_MASTER_PORT>
-                  <SPARK_APP>${spark.app}</SPARK_APP>
                 </env>
                 <assembly>
                   <mode>dir</mode>
