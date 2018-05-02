@@ -1,4 +1,4 @@
-package io.enmasse.example.common;
+package io.enmasse.iot;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,8 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.util.Properties;
 

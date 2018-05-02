@@ -15,12 +15,11 @@ To build the java code, you need [Maven](https://maven.apache.org/) already inst
 In this workshop we will be working with 5 different components:
 
 * An EnMasse messaging service
-* A Spark cluster for doing analytics
-* A Spark driver containing the analytics code
+* A Spark cluster and driver containing the analytics code
 * A Thermostat application performing command & control of devices
 * One or more IoT device simulators
 
-The first 2 will be deployed directly to OpenShift and may be already setup for you. The spark-driver and thermostat will be built and
+The first will be deployed directly to OpenShift and may be already setup for you. The spark and thermostat applications will be built and
 deployed to OpenShift from your laptop, and the device IoT simulator will be running locally on your laptop.
 
 ![deployment](images/demo_deployment.png)
@@ -119,27 +118,6 @@ You can observe the state of the EnMasse cluster using `oc get pods -n enmasse-w
 
 In the OpenShift console, you can see the different deployments for the various EnMasse components. You can go into each pod and look at the logs. If we go to the address controller log, you can see that its creating a 'default' address space.
 
-## (Optional) Installing Apache Spark
-
-An official support for Apache Spark on OpenShift is provided by the [radanalytics.io](https://radanalytics.io/) project by means of
-the Oshinko application with a Web UI for deploying a Spark cluster. Other than using such a Web UI, a CLI tool is available as well which is used for this workshop.
-
-Go to [Oshinko CLI downloads](https://github.com/radanalyticsio/oshinko-cli/releases) and download
-the latest release (0.4.6 as of time of writing). Unpack the release:
-
-```
-tar xvf oshinko_v0.4.6_linux_amd64.tar.gz
-```
-
-Then use the following command in order to deploy a Spark cluster made by one master node and one slave node.
-
-```
-export SPARK_NAME=<something>
-
-oc new-project spark
-./oshinko_linux_amd64/oshinko create $SPARK_NAME --masters=1 --workers=1
-```
-
 ## IoT Application
 
 Now that the cluster has been set up, its time to work on the example application. First, we will
@@ -224,7 +202,7 @@ define the mapping:
 * _deviceX_ :
   * recv: control/deviceX
   * send: temperature
-* _spark-driver_ : 
+* _spark_ : 
   * recv: temperature
   * send: max
 * _thermostat_ :
@@ -233,18 +211,16 @@ define the mapping:
 
 We will create the bindings to each of the application as we deploy them.
 
-### Deploying the "Temperature Analyzer" Spark driver
+### Deploying the "Temperature Analyzer" Spark Application
 
-The `spark-driver` directory provides the Spark Streaming driver application and a Docker image for running the related Spark driver inside the cluster. The spark-driver is deployed by building and running it on the OpenShift cluster.  The spark-driver uses the [fabric8-maven-plugin](https://github.com/fabric8io/fabric8-maven-plugin) to create a docker image, an OpenShift deployment config, and deploy the spark-driver into OpenShift.
-
-To deploy the spark driver:
+The `spark-driver` directory provides the Spark Streaming driver application and a Docker image for running the related Spark driver inside a cluster. The Spark cluster and spark-driver is deployed by building and running it on the OpenShift cluster using Source-2-Image. The spark cluster and driver are deployed together using a template: 
 
 ```
 cd iot/spark-driver
-mvn clean package fabric8:resource fabric8:build fabric8:deploy -Dspark.master.host=${SPARK_NAME}.spark.svc -Dspark.app=myapp
+oc process -f ../../oshinko/driver-template.json GIT_URI=https://github.com/EnMasseProject/enmasse-workshop.git | oc create -f -
 ```
 
-This command will package the application and build a Docker image deployed to OpenShift.
+This command will create a Spark cluster on-demand and deploy the driver application to it. To make modifications to the driver, fork this repository, edit the source and push the changes to your own repo. Then you can change the above template parameter to point to your repo.
 
 Once the driver has been deployed, we need to create a binding with the permissions we defined above. Click on "Create binding" to open the dialog to create a binding. Set `sendAddresses` to `max` and `recvAddresses` to `temperature`.
 

@@ -16,7 +16,6 @@
 
 package io.enmasse.iot.controller.thermostat;
 
-import io.enmasse.example.common.AppCredentials;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
