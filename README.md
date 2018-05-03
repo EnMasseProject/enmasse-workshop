@@ -120,36 +120,38 @@ In the OpenShift console, you can see the different deployments for the various 
 
 ## IoT Application
 
-Now that the cluster has been set up, its time to work on the example application. First, login to
-the OpenShift console and create a workspace for your project:
+The main part of this workshop is to setup an end-2-end IoT application.
 
-![OpenShift1](images/openshiftconsole1.png)
-![OpenShift1](images/openshiftconsole2.png)
+1. Login to the OpenShift console and create a workspace for your project:
 
+    ![OpenShift1](images/openshiftconsole1.png)
+    ![OpenShift1](images/openshiftconsole2.png)
+
+This project will be used to deploy the IoT application.
 
 ### Provisioning messaging
 
 We now provision messaging infrastructure to use with the application.
 
-In the OpenShift Service Catalog overview, select the "EnMasse (standard)" service.
+1. In the OpenShift Service Catalog overview, select the "EnMasse (standard)" service:
 
-![Provision1](images/messagingprovision1.png)
+    ![Provision1](images/messagingprovision1.png)
 
-Select the 'unlimited-standard' plan.
+1. Select the 'unlimited-standard' plan:
 
-![Provision2](images/messagingprovision2.png)
+    ![Provision2](images/messagingprovision2.png)
 
-Select the project previously created and enter a name for the address space.
+1. Select the project previously created and enter a name for the address space:
 
-![Provision3](images/messagingprovision3.png)
+    ![Provision3](images/messagingprovision3.png)
 
-Skip creating the binding.
+1. Skip creating the binding:
 
-![Provision4](images/messagingprovision4.png)
+    ![Provision4](images/messagingprovision4.png)
 
-The address space will be provisioned and may take a few minutes. Jump to the project page.
+1. The address space will be provisioned and may take a few minutes. Jump to the project page:
 
-![Provision5](images/messagingprovision5.png)
+    ![Provision5](images/messagingprovision5.png)
 
 Once the provisioning is complete you should be able to see the dashboard link which we will later use to access the messaging console and create the addresses we need for the workshop.
 
@@ -185,43 +187,49 @@ In the 'standard' address space, we have 4 types of addresses.
 
 ### Creating addresses for this workshop
 
-Click on the dashboard link to get to the messaging console:
+1. Click on the dashboard link to get to the messaging console:
 
-![Provision6](images/messagingprovision6.png)
+    ![Provision6](images/messagingprovision6.png)
 
-You will be redirected to a login screen. Click the 'OpenShift' button to login with your OpenShift
-credentials:
+    You will be redirected to a login screen.
 
-![Login1](images/messaginglogin1.png)
+1. Click the 'OpenShift' button to login with your OpenShift credentials:
 
-On the side of the login form, you can see a button named "OpenShift". Click on that to authenticate your user using your OpenShift credentials.
+    ![Login1](images/messaginglogin1.png)
 
-![Login2](images/messaginglogin2.png)
+1. On the side of the login form, you can see a button named "OpenShift". Click on that to authenticate your user using your OpenShift credentials:
 
-Once logged in, click on the "Addresses" link and click "create" to create addresses.
+    ![Login2](images/messaginglogin2.png)
 
-![Create1](images/create1.png)
+1. Once logged in, click on the "Addresses" link and click "create" to create addresses:
 
-Create the following addresses:
+    ![Create1](images/create1.png)
 
-   * _temperature_ : type topic - used by devices to report temperature
+1. Create the `temperature` address with type topic. This address is used by devices to report their temperature:
 
-![CreateTemp1](images/createtemp1.png)
-![CreateTemp2](images/createtemp2.png)
+    ![CreateTemp1](images/createtemp1.png)
 
+1. Select the `sharded-topic` plan (*NOTE* this is required for MQTT to work. You can choose `pooled-topic` if using AMQP only):
 
-   * _max_ : type anycast - used by Spark driver to report the max temperature
+    ![CreateTemp2](images/createtemp2.png)
 
-![CreateMax1](images/createmax1.png)
-![CreateMax2](images/createmax2.png)
+1. Create the `max` address with type anycast. This address is used by the spark app to send messages to the thermostat app:
 
+    ![CreateMax1](images/createmax1.png)
 
-   * _control/deviceX_ : type topic - used to send control messages to devices. Per-device control messages will be sent to control/$device-id
+1. Select the `standard` plan:
 
-![Createdev1](images/createdev1.png)
-![Createdev2](images/createdev2.png)
+    ![CreateMax2](images/createmax2.png)
 
-Once the addresses has been created, they should all be marked ready by the green 'tick':
+1. Create the per-device addresses. I.e. `control/device1`. This is used by the thermostat app to send control messages to the device:
+
+    ![Createdev1](images/createdev1.png)
+
+1. Select the `sharded-topic` plan (*NOTE* this is required for MQTT to work. You can choose `pooled-topic` if using AMQP only):
+
+    ![Createdev2](images/createdev2.png)
+
+Once the addresses have been created, they should all be marked ready by the green 'tick' in the address overview:
 
 ![AddrOverview1](images/addressoverview.png)
 
@@ -229,7 +237,7 @@ Once the addresses has been created, they should all be marked ready by the gree
 
 In this workshop we aim to setup a secure-by-default IoT solution, so we need to define the 
 applications and what addresses they need to access. Before we create the bindings we need, lets
-define the mapping:
+define the mapping of what addresses each component needs to access:
 
 * _deviceX_ :
   * recv: control/deviceX
@@ -239,9 +247,9 @@ define the mapping:
   * send: max
 * _thermostat_ :
   * recv: max
-  * send: control
+  * send: control\*
 
-We will create the bindings to each of the application as we deploy them.
+We will create the bindings to each of the applications as we deploy them.
 
 ### Deploying the "Temperature Analyzer" Spark application
 
@@ -252,62 +260,68 @@ The spark application is composed of 2 parts:
 
 #### Deploying a Spark Cluster
 
-First, login to the cluster using the command line:
+1. Login to the cluster using the command line:
 
-```
-oc login https://localhost:8443 -u user1
-oc project user1
-```
+    ```
+    oc login https://localhost:8443 -u user1
+    oc project user1
+    ```
 
-To deploy the spark cluster, use the [template](../../spark/cluster-template.yaml) provided in this tutorial:
+1. Deploy the cluster using the [template](../../spark/cluster-template.yaml) provided in this tutorial:
 
-```
-oc process -f spark/cluster-template.yaml MASTER_NAME=spark-master | oc create -f -
-```
+    ```
+    oc process -f spark/cluster-template.yaml MASTER_NAME=spark-master | oc create -f -
+    ```
 
-This will deploy the spark cluster which may take a while. In your project overview you should see
-the deployments:
+    This will deploy the spark cluster which may take a while. In your project overview you should see
+    the deployments:
 
-![Spark1](images/spark1.png)
+    ![Spark1](images/spark1.png)
 
 #### Deploying the Spark driver
 
 The `iot/spark-driver` directory provides the Spark Streaming driver application and a Docker image for running the related Spark driver inside the cluster. The spark-driver is deployed by building and running it on the OpenShift cluster.  The spark-driver uses the [fabric8-maven-plugin](https://github.com/fabric8io/fabric8-maven-plugin) to create a docker image, an OpenShift deployment config, and deploy the spark-driver into OpenShift.
 
-To deploy the spark driver:
+1. Build the spark driver
 
-```
-cd iot/spark-driver
-mvn clean package fabric8:resource fabric8:build fabric8:deploy -Dspark.master.host=spark-master.user1.svc
-```
+    ```
+    cd iot/spark-driver
+    mvn clean package fabric8:resource fabric8:build fabric8:deploy -Dspark.master.host=spark-master.user1.svc
+    ```
 
-This command will package the application and build a Docker image deployed to OpenShift. You can
-watch the status by looking at the build:
+    This command will package the application and build a Docker image deployed to OpenShift. You can watch the status by looking at the build:
 
-![Spark2](images/spark2.png)
+    ![Spark2](images/spark2.png)
 
-Once the driver has been deployed, you should see it in the project overview:
+    Once the driver has been deployed, you should see it in the project overview:
 
-![Spark3](images/spark3.png)
+    ![Spark3](images/spark3.png)
 
-We now need to create a binding with the permissions we defined above. Click on "Create binding" to open the dialog to create a binding.
+1. We now need to create a binding with the permissions we defined above. Click on "Create binding" to open the dialog to create a binding:
 
-![SparkBinding1](images/sparkbinding1.png)
+    ![SparkBinding1](images/sparkbinding1.png)
 
-Set `sendAddresses` to `max` and `recvAddresses` to `temperature`.
+1. Set `sendAddresses` to `max` and `recvAddresses` to `temperature`:
 
-![SparkBinding2](images/sparkbinding2.png)
-![SparkBinding3](images/sparkbinding3.png)
+    ![SparkBinding2](images/sparkbinding2.png)
 
-Go to the secret that was created and click "Add to application". 
+1. The binding should get created successfully, close the dialog:
 
-![SparkBinding4](images/sparkbinding4.png)
-![SparkBinding5](images/sparkbinding5.png)
+    ![SparkBinding3](images/sparkbinding3.png)
 
+1. Go to the secret that was created:
 
-This will allow you modify your application deployment to mount the secret so that the example application can use it. Select the option to mount it and enter `/etc/app-credentials` as the mount point.
+    ![SparkBinding4](images/sparkbinding4.png)
 
-![SparkBinding6](images/sparkbinding6.png)
+1. Click "Add to application":
+
+    ![SparkBinding5](images/sparkbinding5.png)
+
+    This will allow you modify your application deployment to mount the secret so that the example application can use it. 
+
+1. Select the option to mount it and enter `/etc/app-credentials` as the mount point:
+
+    ![SparkBinding6](images/sparkbinding6.png)
 
 The spark-driver will now redeploy and read the credentials from the binding.
 
@@ -317,36 +331,45 @@ The spark-driver will now redeploy and read the credentials from the binding.
 
 The thermostat application uses the [fabric8-maven-plugin](https://github.com/fabric8io/fabric8-maven-plugin) to create a docker image, an OpenShift deployment config, and deploy the thermostat into OpenShift.
 
-To build the application as a Docker image and deploy it to the OpenShift cluster:
+1. Build the application as a Docker image and deploy it to the OpenShift cluster:
 
-```
-cd iot/thermostat
-mvn package fabric8:resource fabric8:build fabric8:deploy -Dfabric8.mode=openshift
-```
+    ```
+    cd iot/thermostat
+    mvn package fabric8:resource fabric8:build fabric8:deploy -Dfabric8.mode=openshift
+    ```
+    You can see the builds by going to the builds menu again:
 
-The thermostat will be deployed to the OpenShift cluster. You can see the builds by going to the builds menu again:
+    ![Thermostat1](images/thermostat1.png)
 
-![Thermostat1](images/thermostat1.png)
+    Eventually, the thermostat is deployed:
 
-Eventually, the thermostat is deployed:
+    ![Thermostat2](images/thermostat2.png)
 
-![Thermostat2](images/thermostat2.png)
+    Once the thermostat has been deployed, we need to create a binding with the permissions we defined above. 
 
-Once the thermostat has been deployed, we need to create a binding with the permissions we defined above. Click on "Create binding" to open the dialog to create a binding. Set `sendAddresses` to `control*` and `recvAddresses` to `max`.
+1. Click on "Create binding" to open the dialog to create a binding:
 
-![Thermostat3](images/thermostat3.png)
-![Thermostat4](images/thermostat4.png)
+    ![Thermostat3](images/thermostat3.png)
 
-Go to the secret that was created and click "Add to application". 
+1. Set `sendAddresses` to `control*` and `recvAddresses` to `max`:
 
-![Thermostat5](images/thermostat5.png)
-![Thermostat6](images/thermostat6.png)
+    ![Thermostat4](images/thermostat4.png)
 
-This will allow you modify your application deployment to mount the secret so that the example application can use it. Select the option to mount it and enter `/etc/app-credentials` as the mount point.
+1. Go to the secret that was created:
 
-![Thermostat7](images/thermostat7.png)
+    ![Thermostat5](images/thermostat5.png)
 
-The thermostat will now redeploy and read the credentials from the binding.
+1. Click "Add to application":
+
+    ![Thermostat6](images/thermostat6.png)
+
+    This will allow you modify your application deployment to mount the secret so that the example application can use it.
+
+1. Select the option to mount it and enter `/etc/app-credentials` as the mount point:
+
+    ![Thermostat7](images/thermostat7.png)
+
+The thermostat will now redeploy and read the credentials from the binding:
 
 ![Thermostat8](images/thermostat8.png)
 
@@ -376,35 +399,34 @@ The console application can be configured using a `device.properties` file which
 
 #### Configuring device
 
-First, create another binding for the device.
+1. Create another binding for the device:
 
-![Device1](images/device1.png)
+    ![Device1](images/device1.png)
 
-This time, we want the device to read control messages for its address. We also want it to be able
+1. This time, we want the device to read control messages for its address. We also want it to be able
 to send to the temperature address. Most importantly, we want to get hold of the external hostnames
-that the device can connect to, so make sure 'externalAccess' is set.
+that the device can connect to, so make sure 'externalAccess' is set:
 
-![Device2](images/device2.png)
+    ![Device2](images/device2.png)
 
-Once created, view the device secret.
+1. Once created, view the device secret:
 
-![Device3](images/device3.png)
+    ![Device3](images/device3.png)
 
-Reveal the secrets!
+1. Reveal the secret:
 
-![Device4](images/device4.png)
+    ![Device4](images/device4.png)
 
-Capture the values for the `externalMessagingHost` and `externalMessagingPort` and configure the `service.hostname` and `service.port` fields in `iot/clients/src/main/resources/device-amqp.properties`. For MQTT, use the values `externalMqttHost` and `externalMqttPort` and write them to `iot/clients/src/main/resources/device-mqtt.properties` instead.
+1. Copy the values for the `externalMessagingHost` and `externalMessagingPort` and configure the `service.hostname` and `service.port` fields in `iot/clients/src/main/resources/device-amqp.properties`. For MQTT, use the values `externalMqttHost` and `externalMqttPort` and write them to `iot/clients/src/main/resources/device-mqtt.properties` instead.
 
-Store the value of the `messagingCert.pem` field in a local file and update the
-`device.transport.ssl.servercert` field in `iot/clients/src/main/resources/device-amqp.properties`.  The `messagingCert` and `mqttCert` fields contains the certificates needed by the AMQP and MQTT clients respectively.
+    Store the value of the `messagingCert.pem` field in a local file and update the `device.transport.ssl.servercert` field in `iot/clients/src/main/resources/device-amqp.properties`.  The `messagingCert` and `mqttCert` fields contains the certificates needed by the AMQP and MQTT clients respectively.
 
-![Device5](images/device5.png)
+    ![Device5](images/device5.png)
 
-Finally, copy the values for the `username` and `password` into `device.username` and
-`device.password` in the device properties file.
+1. Finally, copy the values for the `username` and `password` into `device.username` and
+`device.password` in the device properties file:
 
-![Device6](images/device6.png)
+    ![Device6](images/device6.png)
 
 An example final configuration:
 
