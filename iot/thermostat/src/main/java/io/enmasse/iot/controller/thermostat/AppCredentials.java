@@ -1,4 +1,4 @@
-package io.enmasse.example.common;
+package io.enmasse.iot.controller.thermostat;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
