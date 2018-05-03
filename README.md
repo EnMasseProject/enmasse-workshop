@@ -1,14 +1,14 @@
 # EnMasse Workshop
-In this workshop you will deploy [EnMasse](http://enmasse.io/), [Apache Spark](https://spark.apache.org/) and an IoT sensors simulator.
-You gain insight into deploying and operating an EnMasse cluster, and connect it to a Spark cluster for analyzing the sensors data.
+
+In this workshop you will deploy messaging based on [EnMasse](http://enmasse.io/), [Apache Spark](https://spark.apache.org/) and an IoT sensors simulator. You will learn how to provision messaging infrastructure to connect all components in an end 2 end IoT application.
 
 ## Prerequisites
 
-This tutorial can be run from scratch where you install OpenShift, EnMasse and Spark. You
-might also have an environment setup for you with these components, in which case you can skip the
-parts marked optional. When installing from scratch, tutorial requires [Ansible](www.ansible.org) to deploy components to OpenShift.
+*NOTE* An OpenShift cluster with EnMasse has been set up at [https://openshift.amqonlineworkshop.com:8443/](https://openshift.amqonlineworkshop.com:8443/). Login credentials will be handed out by the presenters.
 
-To build the java code, you need [Maven](https://maven.apache.org/) already installed on the machine.  If you don't have that, there is the [official installation guide](https://maven.apache.org/install.html) for doing that. Finally, the [OpenShift](https://www.openshift.org) client tools is used for several operations.
+To build the java code, you need [Maven](https://maven.apache.org/) already installed on the machine.  If you don't have that, there is the [official installation guide](https://maven.apache.org/install.html) for doing that. Finally, the [OpenShift](https://github.com/openshift/origin/releases/tag/v3.9.0) client tools is used for several operations. Follow [this guide](https://github.com/EnMasseProject/enmasse-workshop#getting-oc-tools) on how to install it if you don't have it installed yet.
+
+Finally, internet connection is needed!
 
 ## Overview
 
@@ -19,104 +19,15 @@ In this workshop we will be working with 5 different components:
 * A Thermostat application performing command & control of devices
 * One or more IoT device simulators
 
-The first will be deployed directly to OpenShift and may be already setup for you. The spark and thermostat applications will be built and
+The messaging service has already been setup on the OpenShift cluster. The spark and thermostat applications will be built and
 deployed to OpenShift from your laptop, and the device IoT simulator will be running locally on your laptop.
 
 ![deployment](images/demo_deployment.png)
 
-## (Optional) Installing OpenShift
 
-### Downloading and installing minishift
+## Downloading the tutorial files
 
-If you don't have an OpenShift cluster available, you can use [minishift](https://github.com/minishift/minishift/) to run OpenShift locally on your laptop. Minishift supports all major OS platforms.  Go to https://github.com/minishift/minishift/releases and select the latest version and the download for your OS.
-
-### Starting minishift
-
-For this workshop, we are going to use the Service Catalog which is part of the experimental features group at time of writing and for this reason needs to be explicitly enabled.
-
-```
-export MINISHIFT_ENABLE_EXPERIMENTAL=y
-```
-
-In this wat, the `--service-catalog` flag can be used on starting minishift in order to enable the Service Catalog.
-Then you need at least 4GB of RAM for your minishift instance since we're running both EnMasse and Spark on a local OpenShift cluster.
-
-```
-minishift start --cpus 2 --memory 4096 --service-catalog true
-```
-
-Once this command completes, the OpenShift cluster should be ready to use.
-
-In order to run the Ansible playbook used for deploying EnMasse, the logged user needs admin rights. It should be satisfied by the cluster administrator but using minishift it's not true from the beginning. For this reason, it's needed to assign `cluster-admin` rights to the user (i.e. "developer").
-
-```
-oc login -u system:admin
-oc adm policy add-cluster-role-to-user cluster-admin developer
-oc login -u developer -p developer
-```
-
-### Exploring the console
-
-Take a few minutes to familiarize yourself with the OpenShift console. If you use minishift, you can run `minishift dashboard` which will open a window in your web browser. With minishift, you can login with username <b>developer</b> and password <b>developer</b>.
-
-### Getting OC tools
-
-In order to execute commands against the OpenShift cluster, an `oc` client tool is needed.
-Go to [OpenShift Origin client tools releases](https://github.com/openshift/origin/releases/) and download
-the latest stable release (3.7.2 as of time of writing). Unpack the release:
-
-```
-tar xvf openshift-origin-client-tools-v3.7.2-282e43f-linux-64bit.tar.gz
-```
-
-Then add the folder with the `oc` tools to the `PATH` :
-
-```
-PATH=$PATH:openshift-origin-client-tools-v3.7.2-282e43f-linux-64bit.tar.gz
-```
-
-## (Optional) Installing EnMasse
-
-EnMasse is an open source messaging platform, with focus on scalability and performance. EnMasse can run on your own infrastructure or in the cloud, and simplifies the deployment of messaging infrastructure.
-
-For this workshop, all messages will flow through EnMasse in some way.
-
-The EnMasse version used in this workshop can be found in the `enmasse` directory. We will use an [Ansible](www.ansible.org) playbook to install EnMasse and have a look at its options.
-
-### Running the playbook
-
-This workshop will use the following [playbook](enmasse/ansible/playbooks/openshift/workshop.yml):
-
-```
-- hosts: localhost
-  vars:
-    namespace: enmasse-system
-    multitenant: true
-    enable_rbac: true
-    service_catalog: true
-    keycloak_admin_password: admin
-    authentication_services:
-      - standard
-  roles:
-    - enmasse
-```
-
-This playbook instructs Ansible to install EnMasse to the `enmasse-system` namespace in OpenShift.  We will use the service catalog integration to make it easy to provision the messaging service. We will also use [Keycloak](www.keycloak.org) for authentication. If your OpenShift cluster is on a public network, please change the `keycloak_admin_password` to what you prefer.
-
-You can modify the settings to your liking, but the rest of the workshop will assume the above being set.
-
-To install EnMasse, first log in to your OpenShift cluster, then run the playbook:
-
-```
-oc login -u developer -p developer https://localhost:8443 
-ansible-playbook enmasse/ansible/playbooks/openshift/workshop.yml
-```
-
-### Startup
-
-You can observe the state of the EnMasse cluster using `oc get pods -n enmasse-system`. When all the pods are in the `Running` state, the cluster is ready. While waiting, go to the OpenShift console.
-
-In the OpenShift console, you can see the different deployments for the various EnMasse components. You can go into each pod and look at the logs. If we go to the address controller log, you can see that its creating a 'default' address space.
+The easiest way to use this tutorial is to [download](https://github.com/EnMasseProject/enmasse-workshop/archive/rhsummit18.zip) the zip and and unzip the archive on your laptop.
 
 ## IoT Application
 
@@ -271,14 +182,15 @@ The spark application is composed of 2 parts:
 1. Login to the cluster using the command line:
 
     ```
-    oc login https://localhost:8443 -u user1
-    oc project user1
+    oc login https://openshift.amqonlineworkshop.com:8443 -u <user>
+    oc project <user>
     ```
 
 1. Deploy the cluster using the [template](https://github.com/EnMasseProject/enmasse-workshop/blob/master/spark/cluster-template.yaml) provided in this tutorial:
 
     ```
-    oc process -f spark/cluster-template.yaml MASTER_NAME=spark-master | oc create -f -
+    cd enmasse-workshop-rhsummit18/spark
+    oc process -f cluster-template.yaml MASTER_NAME=spark-master | oc create -f -
     ```
 
     This will deploy the spark cluster which may take a while. In your project overview you should see
@@ -290,10 +202,10 @@ The spark application is composed of 2 parts:
 
 The `iot/spark-driver` directory provides the Spark Streaming driver application and a Docker image for running the related Spark driver inside the cluster. The spark-driver is deployed by building and running it on the OpenShift cluster.  The spark-driver uses the [fabric8-maven-plugin](https://github.com/fabric8io/fabric8-maven-plugin) to create a docker image, an OpenShift deployment config, and deploy the spark-driver into OpenShift.
 
-1. Build the spark driver
+1. Build the spark driver:
 
     ```
-    cd iot/spark-driver
+    cd enmasse-workshop-rhsummit18/iot/spark-driver
     mvn clean package fabric8:resource fabric8:build fabric8:deploy -Dspark.master.host=spark-master.<user>.svc
     ```
 
@@ -342,7 +254,7 @@ The thermostat application uses the [fabric8-maven-plugin](https://github.com/fa
 1. Build the application as a Docker image and deploy it to the OpenShift cluster:
 
     ```
-    cd iot/thermostat
+    cd enmasse-workshop-rhsummit18/iot/thermostat
     mvn package fabric8:resource fabric8:build fabric8:deploy -Dfabric8.mode=openshift
     ```
     You can see the builds by going to the builds menu again:
@@ -483,7 +395,7 @@ If you go to your messaging console, you should see the different clients connec
 In order to run the `HeatingDevice` application you can use the Maven `exec` plugin with the following command from the `clients` directory.
 
 ```
-cd iot/clients
+cd enmasse-workshop-rhsummit18/iot/clients
 mvn package
 mvn exec:java -Dexec.mainClass=io.enmasse.iot.device.impl.HeatingDevice -Dexec.args=<path-to-device-properties-file>
 ```
