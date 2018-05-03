@@ -90,7 +90,7 @@ This workshop will use the following [playbook](enmasse/ansible/playbooks/opensh
 ```
 - hosts: localhost
   vars:
-    namespace: enmasse-workshop
+    namespace: enmasse-system
     multitenant: true
     enable_rbac: true
     service_catalog: true
@@ -101,7 +101,7 @@ This workshop will use the following [playbook](enmasse/ansible/playbooks/opensh
     - enmasse
 ```
 
-This playbook instructs Ansible to install EnMasse to the `enmasse-workshop` namespace in OpenShift.  We will use the service catalog integration to make it easy to provision the messaging service. We will also use [Keycloak](www.keycloak.org) for authentication. If your OpenShift cluster is on a public network, please change the `keycloak_admin_password` to what you prefer.
+This playbook instructs Ansible to install EnMasse to the `enmasse-system` namespace in OpenShift.  We will use the service catalog integration to make it easy to provision the messaging service. We will also use [Keycloak](www.keycloak.org) for authentication. If your OpenShift cluster is on a public network, please change the `keycloak_admin_password` to what you prefer.
 
 You can modify the settings to your liking, but the rest of the workshop will assume the above being set.
 
@@ -114,7 +114,7 @@ ansible-playbook enmasse/ansible/playbooks/openshift/workshop.yml
 
 ### Startup
 
-You can observe the state of the EnMasse cluster using `oc get pods -n enmasse-workshop`. When all the pods are in the `Running` state, the cluster is ready. While waiting, go to the OpenShift console.
+You can observe the state of the EnMasse cluster using `oc get pods -n enmasse-system`. When all the pods are in the `Running` state, the cluster is ready. While waiting, go to the OpenShift console.
 
 In the OpenShift console, you can see the different deployments for the various EnMasse components. You can go into each pod and look at the logs. If we go to the address controller log, you can see that its creating a 'default' address space.
 
