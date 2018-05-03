@@ -122,7 +122,11 @@ In the OpenShift console, you can see the different deployments for the various 
 
 The main part of this workshop is to setup an end-2-end IoT application.
 
-1. Login to the OpenShift console and create a workspace for your project:
+1. Login to the OpenShift console:
+
+    ![OpenShiftLogin](images/openshiftlogin.png)
+
+1. Create a workspace for your project:
 
     ![OpenShift1](images/openshiftconsole1.png)
     ![OpenShift1](images/openshiftconsole2.png)
