@@ -205,6 +205,10 @@ In the 'standard' address space, we have 4 types of addresses.
 
     ![Login2](images/messaginglogin2.png)
 
+1. Allow keycloak to read user info:
+
+    ![AuthAccess1](images/authaccess1.png)
+
 1. Once logged in, click on the "Addresses" link and click "create" to create addresses:
 
     ![Create1](images/create1.png)
