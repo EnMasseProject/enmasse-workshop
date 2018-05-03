@@ -484,6 +484,7 @@ In order to run the `HeatingDevice` application you can use the Maven `exec` plu
 
 ```
 cd iot/clients
+mvn package
 mvn exec:java -Dexec.mainClass=io.enmasse.iot.device.impl.HeatingDevice -Dexec.args=<path-to-device-properties-file>
 ```
 
