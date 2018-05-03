@@ -267,7 +267,7 @@ The spark application is composed of 2 parts:
     oc project user1
     ```
 
-1. Deploy the cluster using the [template](../../spark/cluster-template.yaml) provided in this tutorial:
+1. Deploy the cluster using the [template](https://github.com/EnMasseProject/enmasse-workshop/blob/master/spark/cluster-template.yaml) provided in this tutorial:
 
     ```
     oc process -f spark/cluster-template.yaml MASTER_NAME=spark-master | oc create -f -
