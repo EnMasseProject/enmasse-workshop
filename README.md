@@ -413,7 +413,11 @@ The console application can be configured using a `device.properties` file which
 
 1. This time, we want the device to read control messages for its address. We also want it to be able
 to send to the temperature address. Most importantly, we want to get hold of the external hostnames
-that the device can connect to, so make sure 'externalAccess' is set:
+that the device can connect to.
+
+    *NOTE* However, use '*' and '*' for both `sendAddresses` and `recvAddresses`, as there is a known limitation around authorization and MQTT in EnMasse.
+
+    Make sure 'externalAccess' is set:
 
     ![Device2](images/device2.png)
 
