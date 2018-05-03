@@ -35,6 +35,17 @@ objects:
     selector:
       name: ${MASTER_NAME}
 
+- kind: Route
+  apiVersion: v1
+  metadata:
+    name: ${MASTER_NAME}-webui
+    labels:
+      name: ${MASTER_NAME}
+  spec:
+    to:
+      kind: Service
+      name: ${MASTER_NAME}-webui
+
 - kind: DeploymentConfig
   apiVersion: v1
   metadata:
