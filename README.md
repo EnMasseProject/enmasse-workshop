@@ -294,7 +294,7 @@ The `iot/spark-driver` directory provides the Spark Streaming driver application
 
     ```
     cd iot/spark-driver
-    mvn clean package fabric8:resource fabric8:build fabric8:deploy -Dspark.master.host=spark-master.user1.svc
+    mvn clean package fabric8:resource fabric8:build fabric8:deploy -Dspark.master.host=spark-master.<user>.svc
     ```
 
     This command will package the application and build a Docker image deployed to OpenShift. You can watch the status by looking at the build:
@@ -327,7 +327,7 @@ The `iot/spark-driver` directory provides the Spark Streaming driver application
 
     This will allow you modify your application deployment to mount the secret so that the example application can use it. 
 
-1. Select the option to mount it and enter `/etc/app-credentials` as the mount point:
+1. Select the `spark-driver` as application and the option to mount the secret and enter `/etc/app-credentials` as the mount point:
 
     ![SparkBinding6](images/sparkbinding6.png)
 
@@ -373,7 +373,7 @@ The thermostat application uses the [fabric8-maven-plugin](https://github.com/fa
 
     This will allow you modify your application deployment to mount the secret so that the example application can use it.
 
-1. Select the option to mount it and enter `/etc/app-credentials` as the mount point:
+1. Select the `thermostat` as application and the option to mount the secret and enter `/etc/app-credentials` as the mount point:
 
     ![Thermostat7](images/thermostat7.png)
 
